@@ -11,16 +11,16 @@
             "preLaunchTask": "build",
             // If you have changed target frameworks, make sure to update the program path.
             "program": "${workspaceFolder}/bin/Debug/net5.0/DowiezPlBackend.dll",
-            "args": [],
+            "args": [
+                "--launch-profile DowiezPlBackend"
+            ],
             "cwd": "${workspaceFolder}",
             "stopAtEntry": false,
             // Enable launching a web browser when ASP.NET Core starts. For more information: https://aka.ms/VSCode-CS-LaunchJson-WebBrowser
-            "env": {
-                "ASPNETCORE_ENVIRONMENT": "Development"
-            },
             "sourceFileMap": {
                 "/Views": "${workspaceFolder}/Views"
-            }
+            },
+            "console": "externalTerminal"
         },
         {
             "name": ".NET Core Attach",

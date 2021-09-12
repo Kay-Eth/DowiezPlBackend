@@ -11,7 +11,12 @@
                 "/property:GenerateFullPaths=true",
                 "/consoleloggerparameters:NoSummary"
             ],
-            "problemMatcher": "$msCompile"
+            "problemMatcher": "$msCompile",
+            "options": {
+                "statusbar": {
+                    "hide": true
+                }
+            }
         },
         {
             "label": "publish",
@@ -23,7 +28,12 @@
                 "/property:GenerateFullPaths=true",
                 "/consoleloggerparameters:NoSummary"
             ],
-            "problemMatcher": "$msCompile"
+            "problemMatcher": "$msCompile",
+            "options": {
+                "statusbar": {
+                    "hide": true
+                }
+            }
         },
         {
             "label": "watch",
@@ -36,7 +46,73 @@
                 "/property:GenerateFullPaths=true",
                 "/consoleloggerparameters:NoSummary"
             ],
-            "problemMatcher": "$msCompile"
+            "problemMatcher": "$msCompile",
+            "options": {
+                "statusbar": {
+                    "hide": true
+                }
+            }
+        },
+        {
+            "label": "Add initial migration",
+            "command": "dotnet",
+            "type": "process",
+            "args": [
+                "ef",
+                "migrations",
+                "add",
+                "InitialMigration"
+            ],
+            "options": {
+                "statusbar": {
+                    "hide": false
+                }
+            }
+        },
+        {
+            "label": "Remove migrations",
+            "command": "dotnet",
+            "type": "process",
+            "args": [
+                "ef",
+                "migrations",
+                "remove"
+            ],
+            "options": {
+                "statusbar": {
+                    "hide": false
+                }
+            }
+        },
+        {
+            "label": "Update database",
+            "command": "dotnet",
+            "type": "process",
+            "args": [
+                "ef",
+                "database",
+                "update"
+            ],
+            "options": {
+                "statusbar": {
+                    "hide": false
+                }
+            }
+        },
+        {
+            "label": "Generate SQL Script",
+            "command": "dotnet",
+            "type": "process",
+            "args": [
+                "ef",
+                "migrations",
+                "script"
+            ],
+            "options": {
+                "statusbar": {
+                    "hide": false
+                }
+            }
         }
     ]
 }
