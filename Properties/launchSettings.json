@@ -28,7 +28,7 @@
       }
     },
     "DowiezPlBackend_Server": {
-      "commandName": "Server",
+      "commandName": "Project",
       "dotnetRunMessages": "true",
       "launchBrowser": true,
       "launchUrl": "swagger",
