@@ -1,10 +1,11 @@
 using DowiezPlBackend.Models;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 
 namespace DowiezPlBackend.Data
 {
-    public class DowiezPlDbContext : IdentityDbContext
+    public class DowiezPlDbContext : IdentityDbContext<AppUser, IdentityRole, string>
     {
         public DbSet<City> Cities { get; set; }
 

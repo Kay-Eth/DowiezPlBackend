@@ -6,6 +6,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace DowiezPlBackend.Controllers
 {
+    [ApiExplorerSettings(IgnoreApi = true)]
     public class ErrorController : ControllerBase
     {
         [Route("/error")]

@@ -19,6 +19,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using Newtonsoft.Json.Serialization;
 using System.Net.Mime;
+using DowiezPlBackend.Models;
 
 namespace DowiezPlBackend
 {
@@ -44,7 +45,7 @@ namespace DowiezPlBackend
                     .EnableDetailedErrors()
             );
 
-            services.AddIdentity<IdentityUser, IdentityRole>()
+            services.AddIdentity<AppUser, IdentityRole>()
                 .AddEntityFrameworkStores<DowiezPlDbContext>()
                 .AddDefaultTokenProviders();
             
