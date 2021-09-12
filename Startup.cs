@@ -20,6 +20,8 @@ using Microsoft.IdentityModel.Tokens;
 using Newtonsoft.Json.Serialization;
 using System.Net.Mime;
 using DowiezPlBackend.Models;
+using System.Reflection;
+using System.IO;
 
 namespace DowiezPlBackend
 {
@@ -132,6 +134,10 @@ namespace DowiezPlBackend
                         new string[] {}
                     }
                 });
+
+                var xmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
+                var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
+                c.IncludeXmlComments(xmlPath);
             });
 
             services.AddSwaggerGenNewtonsoftSupport();
