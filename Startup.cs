@@ -47,7 +47,7 @@ namespace DowiezPlBackend
                     .EnableDetailedErrors()
             );
 
-            services.AddIdentity<AppUser, IdentityRole>()
+            services.AddIdentity<AppUser, AppRole>()
                 .AddEntityFrameworkStores<DowiezPlDbContext>()
                 .AddDefaultTokenProviders();
             
@@ -73,7 +73,7 @@ namespace DowiezPlBackend
                 //     {
                 //         var result = new BadRequestObjectResult(context.ModelState);
 
-                //         // TODO: add `using System.Net.Mime;` to resolve MediaTypeNames
+                //         // Maybe: add `using System.Net.Mime;` to resolve MediaTypeNames
                 //         result.ContentTypes.Add(MediaTypeNames.Application.Json);
                 //         result.ContentTypes.Add(MediaTypeNames.Application.Xml);
 

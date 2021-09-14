@@ -24,16 +24,18 @@ namespace DowiezPlBackend
                 {
                     var services = scope.ServiceProvider;
 
-                    var roleManager = services.GetRequiredService<RoleManager<IdentityRole>>();
+                    var roleManager = services.GetRequiredService<RoleManager<AppRole>>();
                     if (! await roleManager.RoleExistsAsync("Standard"))
+                        await roleManager.CreateAsync(new AppRole("Standard"));
+                    if (! await roleManager.RoleExistsAsync("Moderator"))
+                        await roleManager.CreateAsync(new AppRole("Moderator"));
+                    if (! await roleManager.RoleExistsAsync("Admin"))
+                        await roleManager.CreateAsync(new AppRole("Admin"));
+                    
+                    var userManager = services.GetRequiredService<UserManager<AppUser>>();
+                    if (await userManager.FindByEmailAsync("admin@dowiez.pl") == null)
                     {
-                        await roleManager.CreateAsync(new IdentityRole("Standard"));
-                        await roleManager.CreateAsync(new IdentityRole("Moderator"));
-                        await roleManager.CreateAsync(new IdentityRole("Admin"));
-
-                        var userManager = services.GetRequiredService<UserManager<AppUser>>();
-                        var user = new AppUser() { Email = "admin@dowiez.pl", UserName = "DefaultAdmin", FirstName = "Admin", LastName = "Admin", Banned = false };
-
+                        var user = new AppUser() { Email = "admin@dowiez.pl", UserName = "admin@dowiez.pl", FirstName = "Admin", LastName = "Admin", Banned = false };
                         await userManager.CreateAsync(user, "DefaultPassword@123");
                         await userManager.AddToRoleAsync(user, "Admin");
                     }

@@ -34,9 +34,9 @@ namespace DowiezPlBackend.Data
             return await Task.Run(() => _context.Cities);
         }
 
-        public async Task<City> GetCity(int cityId)
+        public async Task<City> GetCity(Guid cityId)
         {
-            return await Task.Run(() => _context.Cities.FirstOrDefault((c) => c.IdCi == cityId));
+            return await Task.Run(() => _context.Cities.FirstOrDefault((c) => c.CityId == cityId));
         }
 
         public async Task DeleteCity(City city)

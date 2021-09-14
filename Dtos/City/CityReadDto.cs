@@ -1,8 +1,11 @@
+using System;
+using System.ComponentModel.DataAnnotations;
+
 namespace DowiezPlBackend.Dtos.City
 {
     public class CityReadDto
     {
-        public int IdCi { get; set; }
+        public Guid CityId { get; set; }
         public string CityName { get; set; }
         public string CityDistrict { get; set; }
     }

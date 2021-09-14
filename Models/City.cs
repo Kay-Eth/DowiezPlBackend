@@ -1,3 +1,4 @@
+using System;
 using System.ComponentModel.DataAnnotations;
 
 namespace DowiezPlBackend.Models
@@ -5,7 +6,7 @@ namespace DowiezPlBackend.Models
     public class City
     {
         [Key]
-        public int IdCi { get; set; }
+        public Guid CityId { get; set; }
 
         [Required]
         [MaxLength(150)]

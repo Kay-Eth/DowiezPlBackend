@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using AutoMapper;
@@ -57,7 +58,7 @@ namespace DowiezPlBackend.Controllers
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status423Locked)]
-        public async Task<ActionResult<CityReadDto>> GetCity(int cityId)
+        public async Task<ActionResult<CityReadDto>> GetCity(Guid cityId)
         {
             var city = await _repository.GetCity(cityId);
             if (city == null)
@@ -92,7 +93,7 @@ namespace DowiezPlBackend.Controllers
 
             var cityReadDto = _mapper.Map<CityReadDto>(city);
             
-            return CreatedAtRoute(nameof(GetCity), new { cityId = cityReadDto.IdCi }, cityReadDto);
+            return CreatedAtRoute(nameof(GetCity), new { cityId = cityReadDto.CityId }, cityReadDto);
         }
 
         // PUT api/Cities
@@ -112,7 +113,7 @@ namespace DowiezPlBackend.Controllers
         [ProducesResponseType(StatusCodes.Status423Locked)]
         public async Task<ActionResult> UpdateCity(CityUpdateDto cityUpdateDto)
         {
-            var cityFromRepo = await _repository.GetCity(cityUpdateDto.IdCi);
+            var cityFromRepo = await _repository.GetCity(cityUpdateDto.CityId);
             if (cityFromRepo == null)
                 return NotFound();
             
@@ -140,7 +141,7 @@ namespace DowiezPlBackend.Controllers
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status423Locked)]
-        public async Task<ActionResult> DeleteCity(int cityId)
+        public async Task<ActionResult> DeleteCity(Guid cityId)
         {
             var cityFromRepo = await _repository.GetCity(cityId);
             if (cityFromRepo == null)

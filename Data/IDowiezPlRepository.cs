@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using DowiezPlBackend.Models;
@@ -10,7 +11,7 @@ namespace DowiezPlBackend.Data
 
         Task CreateCity(City city);
         Task<IEnumerable<City>> GetCities();
-        Task<City> GetCity(int cityId);
+        Task<City> GetCity(Guid cityId);
         Task UpdateCity(City city);
         Task DeleteCity(City city);
     }

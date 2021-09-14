@@ -1,3 +1,4 @@
+using System;
 using System.ComponentModel.DataAnnotations;
 
 namespace DowiezPlBackend.Dtos.City
@@ -5,7 +6,7 @@ namespace DowiezPlBackend.Dtos.City
     public class CityUpdateDto
     {
         [Key]
-        public int IdCi { get; set; }
+        public Guid CityId { get; set; }
         
         [Required]
         [MaxLength(150)]
