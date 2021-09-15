@@ -290,11 +290,18 @@ namespace DowiezPlBackend.Migrations
                     Description = table.Column<string>(type: "varchar(2000)", maxLength: 2000, nullable: true)
                         .Annotation("MySql:CharSet", "utf8mb4"),
                     StartsInCityId = table.Column<Guid>(type: "char(36)", nullable: true, collation: "ascii_general_ci"),
-                    EndsInCityId = table.Column<Guid>(type: "char(36)", nullable: true, collation: "ascii_general_ci")
+                    EndsInCityId = table.Column<Guid>(type: "char(36)", nullable: true, collation: "ascii_general_ci"),
+                    CreatorId = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci")
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Transport", x => x.TransportId);
+                    table.ForeignKey(
+                        name: "FK_Transport_AspNetUsers_CreatorId",
+                        column: x => x.CreatorId,
+                        principalTable: "AspNetUsers",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
                         name: "FK_Transport_Cities_EndsInCityId",
                         column: x => x.EndsInCityId,
@@ -603,6 +610,11 @@ namespace DowiezPlBackend.Migrations
                 name: "IX_Report_ReporterId",
                 table: "Report",
                 column: "ReporterId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Transport_CreatorId",
+                table: "Transport",
+                column: "CreatorId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Transport_EndsInCityId",

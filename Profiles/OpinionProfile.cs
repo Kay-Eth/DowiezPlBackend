@@ -9,12 +9,7 @@ namespace DowiezPlBackend.Profiles
     {
         public OpinionProfile()
         {
-            CreateMap<Opinion, OpinionReadDto>()
-                .ForMember(dest => dest.Issuer,
-                    opts => opts.Ignore())
-                .ForMember(dest => dest.Rated,
-                    opts => opts.Ignore());
-            
+            CreateMap<Opinion, OpinionReadDto>();
             CreateMap<OpinionCreateDto, Opinion>();
             CreateMap<OpinionUpdateDto, Opinion>();
         }

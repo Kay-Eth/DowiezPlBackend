@@ -3,6 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using DowiezPlBackend.Models;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
+
 
 namespace DowiezPlBackend.Data
 {
@@ -36,7 +39,7 @@ namespace DowiezPlBackend.Data
 
         public async Task<City> GetCity(Guid cityId)
         {
-            return await Task.Run(() => _context.Cities.FirstOrDefault((c) => c.CityId == cityId));
+            return await Task.Run(() => _context.Cities.FirstOrDefault(c => c.CityId == cityId));
         }
 
         public async Task DeleteCity(City city)
@@ -51,6 +54,30 @@ namespace DowiezPlBackend.Data
         {
             await Task.Run(() => _context.Cities.Update(city));
         }
+#endregion
+
+#region DEMANDS
+
+        public async Task CreateDemand(Demand demand)
+        {
+            if (demand == null)
+                throw new ArgumentNullException(nameof(demand));
+            
+            await _context.Demands.AddAsync(demand);
+        }
+
+        public async Task<Demand> GetDemand(Guid demandId)
+        {
+            return await Task.Run(() => _context.Demands
+                .Include(c => c.From)
+                .Include(c => c.Destination)
+                .Include(u => u.Creator)
+                .Include(u => u.Reciever)
+                .Include(t => t.Transport)
+                .Include(g => g.LimitedTo)
+                .FirstOrDefault(d => d.DemandId == demandId));
+        }
+
 #endregion
     }
 }

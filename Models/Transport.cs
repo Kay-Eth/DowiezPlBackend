@@ -26,5 +26,8 @@ namespace DowiezPlBackend.Models
 
         [Required]
         public City EndsIn { get; set; }
+
+        [Required]
+        public AppUser Creator { get; set; }
     }
 }

@@ -14,5 +14,8 @@ namespace DowiezPlBackend.Data
         Task<City> GetCity(Guid cityId);
         Task UpdateCity(City city);
         Task DeleteCity(City city);
+
+        Task CreateDemand(Demand demand);
+        Task<Demand> GetDemand(Guid demandId);
     }
 }

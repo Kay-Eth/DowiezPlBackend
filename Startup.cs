@@ -84,7 +84,7 @@ namespace DowiezPlBackend
                     s => {
                         s.SerializerSettings.ContractResolver = new CamelCasePropertyNamesContractResolver();
                         s.SerializerSettings.Converters.Add(new Newtonsoft.Json.Converters.StringEnumConverter());
-                        s.SerializerSettings.NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore;
+                        s.SerializerSettings.NullValueHandling = Newtonsoft.Json.NullValueHandling.Include;
                         s.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore;
                     }
                 );

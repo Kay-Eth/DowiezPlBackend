@@ -28,6 +28,8 @@ namespace DowiezPlBackend.Models
         [InverseProperty("Reciever")]
         public ICollection<Demand> RecievingDemands { get; set; }
 
+        public ICollection<Transport> PerformedTransports { get; set; }
+
         [InverseProperty("Reporter")]
         public ICollection<Report> ReportedReports { get; set; }
 

@@ -13,7 +13,6 @@ namespace DowiezPlBackend.Dtos.City
         [MinLength(4)]
         public string CityName { get; set; }
 
-        [Required]
         [MaxLength(50)]
         [MinLength(4)]
         public string CityDistrict { get; set; }

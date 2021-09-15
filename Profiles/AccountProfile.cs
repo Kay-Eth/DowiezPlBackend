@@ -15,14 +15,8 @@ namespace DowiezPlBackend.Profiles
                     opts => opts.Ignore());
             
             CreateMap<AccountCreateDto, AppUser>()
-                .ForMember(dest => dest.Email,
-                    opts => opts.MapFrom(src => src.Email))
                 .ForMember(dest => dest.UserName,
                     opts => opts.MapFrom(src => src.Email))
-                .ForMember(dest => dest.FirstName,
-                    opts => opts.MapFrom(src => src.FirstName))
-                .ForMember(dest => dest.LastName,
-                    opts => opts.MapFrom(src => src.LastName))
                 .ForMember(dest => dest.Banned,
                     opts => opts.Ignore());
                 

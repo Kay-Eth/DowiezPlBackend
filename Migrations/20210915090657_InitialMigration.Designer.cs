@@ -9,7 +9,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace DowiezPlBackend.Migrations
 {
     [DbContext(typeof(DowiezPlDbContext))]
-    [Migration("20210914135642_InitialMigration")]
+    [Migration("20210915090657_InitialMigration")]
     partial class InitialMigration
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -389,6 +389,9 @@ namespace DowiezPlBackend.Migrations
                     b.Property<DateTime>("CreationDate")
                         .HasColumnType("datetime(6)");
 
+                    b.Property<Guid>("CreatorId")
+                        .HasColumnType("char(36)");
+
                     b.Property<string>("Description")
                         .HasMaxLength(2000)
                         .HasColumnType("varchar(2000)");
@@ -403,6 +406,8 @@ namespace DowiezPlBackend.Migrations
                         .HasColumnType("datetime(6)");
 
                     b.HasKey("TransportId");
+
+                    b.HasIndex("CreatorId");
 
                     b.HasIndex("EndsInCityId");
 
@@ -655,6 +660,12 @@ namespace DowiezPlBackend.Migrations
 
             modelBuilder.Entity("DowiezPlBackend.Models.Transport", b =>
                 {
+                    b.HasOne("DowiezPlBackend.Models.AppUser", "Creator")
+                        .WithMany("PerformedTransports")
+                        .HasForeignKey("CreatorId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.HasOne("DowiezPlBackend.Models.City", "EndsIn")
                         .WithMany()
                         .HasForeignKey("EndsInCityId");
@@ -662,6 +673,8 @@ namespace DowiezPlBackend.Migrations
                     b.HasOne("DowiezPlBackend.Models.City", "StartsIn")
                         .WithMany()
                         .HasForeignKey("StartsInCityId");
+
+                    b.Navigation("Creator");
 
                     b.Navigation("EndsIn");
 
@@ -730,6 +743,8 @@ namespace DowiezPlBackend.Migrations
                     b.Navigation("OpinionsRecieved");
 
                     b.Navigation("Participations");
+
+                    b.Navigation("PerformedTransports");
 
                     b.Navigation("RecievingDemands");
 
