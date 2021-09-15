@@ -47,7 +47,15 @@ namespace DowiezPlBackend
                     .EnableDetailedErrors()
             );
 
-            services.AddIdentity<AppUser, AppRole>()
+            services.AddIdentity<AppUser, AppRole>(opt =>
+            {
+                // opt.Password.RequiredLength = 8;
+                // opt.Password.RequireDigit = false;
+                // opt.Password.RequireUppercase = false;
+
+                opt.User.RequireUniqueEmail = true;
+                opt.SignIn.RequireConfirmedEmail = true;
+            })
                 .AddEntityFrameworkStores<DowiezPlDbContext>()
                 .AddDefaultTokenProviders();
             
@@ -95,9 +103,9 @@ namespace DowiezPlBackend
                   builder =>
                   {
                       builder
-                      .AllowAnyOrigin()
-                      .AllowAnyHeader()
-                      .AllowAnyMethod();
+                        .AllowAnyOrigin()
+                        .AllowAnyHeader()
+                        .AllowAnyMethod();
                   });
             });
 
@@ -108,7 +116,7 @@ namespace DowiezPlBackend
             services.AddSwaggerGen(c =>
             {
                 c.SwaggerDoc("v1", new OpenApiInfo {
-                    Title = "DowiezPlBackend",
+                    Title = "DowiezPlAPI",
                     Version = "v1"
                 });
                 c.AddSecurityDefinition("jwt_auth", new OpenApiSecurityScheme()
