@@ -233,7 +233,7 @@ namespace DowiezPlBackend.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Opinions", x => x.OpinionId);
-                    table.CheckConstraint("CK_Issuer_cannot_rate_itself", "IssuerId <> RatedId");
+                    table.CheckConstraint("CK_Issuer_cannot_rate_himself", "IssuerId <> RatedId");
                     table.ForeignKey(
                         name: "FK_Opinions_AspNetUsers_IssuerId",
                         column: x => x.IssuerId,
@@ -250,7 +250,7 @@ namespace DowiezPlBackend.Migrations
                 .Annotation("MySql:CharSet", "utf8mb4");
 
             migrationBuilder.CreateTable(
-                name: "Report",
+                name: "Reports",
                 columns: table => new
                 {
                     ReportId = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
@@ -264,15 +264,16 @@ namespace DowiezPlBackend.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Report", x => x.ReportId);
+                    table.PrimaryKey("PK_Reports", x => x.ReportId);
+                    table.CheckConstraint("CK_Reporter_cannot_rate_himself", "ReporterId <> ReportedId");
                     table.ForeignKey(
-                        name: "FK_Report_AspNetUsers_ReportedId",
+                        name: "FK_Reports_AspNetUsers_ReportedId",
                         column: x => x.ReportedId,
                         principalTable: "AspNetUsers",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
-                        name: "FK_Report_AspNetUsers_ReporterId",
+                        name: "FK_Reports_AspNetUsers_ReporterId",
                         column: x => x.ReporterId,
                         principalTable: "AspNetUsers",
                         principalColumn: "Id",
@@ -281,7 +282,7 @@ namespace DowiezPlBackend.Migrations
                 .Annotation("MySql:CharSet", "utf8mb4");
 
             migrationBuilder.CreateTable(
-                name: "Transport",
+                name: "Transports",
                 columns: table => new
                 {
                     TransportId = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
@@ -289,27 +290,29 @@ namespace DowiezPlBackend.Migrations
                     TransportDate = table.Column<DateTime>(type: "datetime(6)", nullable: false),
                     Description = table.Column<string>(type: "varchar(2000)", maxLength: 2000, nullable: true)
                         .Annotation("MySql:CharSet", "utf8mb4"),
+                    Status = table.Column<int>(type: "int", nullable: false),
+                    Category = table.Column<int>(type: "int", nullable: false),
                     StartsInCityId = table.Column<Guid>(type: "char(36)", nullable: true, collation: "ascii_general_ci"),
                     EndsInCityId = table.Column<Guid>(type: "char(36)", nullable: true, collation: "ascii_general_ci"),
                     CreatorId = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci")
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Transport", x => x.TransportId);
+                    table.PrimaryKey("PK_Transports", x => x.TransportId);
                     table.ForeignKey(
-                        name: "FK_Transport_AspNetUsers_CreatorId",
+                        name: "FK_Transports_AspNetUsers_CreatorId",
                         column: x => x.CreatorId,
                         principalTable: "AspNetUsers",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_Transport_Cities_EndsInCityId",
+                        name: "FK_Transports_Cities_EndsInCityId",
                         column: x => x.EndsInCityId,
                         principalTable: "Cities",
                         principalColumn: "CityId",
                         onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
-                        name: "FK_Transport_Cities_StartsInCityId",
+                        name: "FK_Transports_Cities_StartsInCityId",
                         column: x => x.StartsInCityId,
                         principalTable: "Cities",
                         principalColumn: "CityId",
@@ -318,7 +321,7 @@ namespace DowiezPlBackend.Migrations
                 .Annotation("MySql:CharSet", "utf8mb4");
 
             migrationBuilder.CreateTable(
-                name: "Group",
+                name: "Groups",
                 columns: table => new
                 {
                     GroupId = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
@@ -331,9 +334,9 @@ namespace DowiezPlBackend.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Group", x => x.GroupId);
+                    table.PrimaryKey("PK_Groups", x => x.GroupId);
                     table.ForeignKey(
-                        name: "FK_Group_Conversation_ConversationId",
+                        name: "FK_Groups_Conversation_ConversationId",
                         column: x => x.ConversationId,
                         principalTable: "Conversation",
                         principalColumn: "ConversationId",
@@ -441,22 +444,22 @@ namespace DowiezPlBackend.Migrations
                         principalColumn: "CityId",
                         onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
-                        name: "FK_Demands_Group_LimitedToGroupId",
+                        name: "FK_Demands_Groups_LimitedToGroupId",
                         column: x => x.LimitedToGroupId,
-                        principalTable: "Group",
+                        principalTable: "Groups",
                         principalColumn: "GroupId",
                         onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
-                        name: "FK_Demands_Transport_TransportId",
+                        name: "FK_Demands_Transports_TransportId",
                         column: x => x.TransportId,
-                        principalTable: "Transport",
+                        principalTable: "Transports",
                         principalColumn: "TransportId",
                         onDelete: ReferentialAction.Restrict);
                 })
                 .Annotation("MySql:CharSet", "utf8mb4");
 
             migrationBuilder.CreateTable(
-                name: "Member",
+                name: "Members",
                 columns: table => new
                 {
                     MemberId = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
@@ -465,17 +468,17 @@ namespace DowiezPlBackend.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Member", x => x.MemberId);
+                    table.PrimaryKey("PK_Members", x => x.MemberId);
                     table.ForeignKey(
-                        name: "FK_Member_AspNetUsers_UserId",
+                        name: "FK_Members_AspNetUsers_UserId",
                         column: x => x.UserId,
                         principalTable: "AspNetUsers",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_Member_Group_GroupId",
+                        name: "FK_Members_Groups_GroupId",
                         column: x => x.GroupId,
-                        principalTable: "Group",
+                        principalTable: "Groups",
                         principalColumn: "GroupId",
                         onDelete: ReferentialAction.Cascade);
                 })
@@ -555,19 +558,19 @@ namespace DowiezPlBackend.Migrations
                 column: "TransportId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Group_ConversationId",
-                table: "Group",
+                name: "IX_Groups_ConversationId",
+                table: "Groups",
                 column: "ConversationId",
                 unique: true);
 
             migrationBuilder.CreateIndex(
-                name: "IX_Member_GroupId",
-                table: "Member",
+                name: "IX_Members_GroupId",
+                table: "Members",
                 column: "GroupId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Member_UserId",
-                table: "Member",
+                name: "IX_Members_UserId",
+                table: "Members",
                 column: "UserId");
 
             migrationBuilder.CreateIndex(
@@ -602,28 +605,28 @@ namespace DowiezPlBackend.Migrations
                 column: "UserId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Report_ReportedId",
-                table: "Report",
+                name: "IX_Reports_ReportedId",
+                table: "Reports",
                 column: "ReportedId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Report_ReporterId",
-                table: "Report",
+                name: "IX_Reports_ReporterId",
+                table: "Reports",
                 column: "ReporterId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Transport_CreatorId",
-                table: "Transport",
+                name: "IX_Transports_CreatorId",
+                table: "Transports",
                 column: "CreatorId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Transport_EndsInCityId",
-                table: "Transport",
+                name: "IX_Transports_EndsInCityId",
+                table: "Transports",
                 column: "EndsInCityId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Transport_StartsInCityId",
-                table: "Transport",
+                name: "IX_Transports_StartsInCityId",
+                table: "Transports",
                 column: "StartsInCityId");
         }
 
@@ -648,7 +651,7 @@ namespace DowiezPlBackend.Migrations
                 name: "Demands");
 
             migrationBuilder.DropTable(
-                name: "Member");
+                name: "Members");
 
             migrationBuilder.DropTable(
                 name: "Message");
@@ -660,16 +663,16 @@ namespace DowiezPlBackend.Migrations
                 name: "Participant");
 
             migrationBuilder.DropTable(
-                name: "Report");
+                name: "Reports");
 
             migrationBuilder.DropTable(
                 name: "AspNetRoles");
 
             migrationBuilder.DropTable(
-                name: "Transport");
+                name: "Transports");
 
             migrationBuilder.DropTable(
-                name: "Group");
+                name: "Groups");
 
             migrationBuilder.DropTable(
                 name: "AspNetUsers");

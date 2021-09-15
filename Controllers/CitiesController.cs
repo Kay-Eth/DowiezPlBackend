@@ -41,7 +41,7 @@ namespace DowiezPlBackend.Controllers
         public async Task<ActionResult<IEnumerable<CityReadDto>>> GetCities()
         {
             await CheckUser();
-            var cities = await _repository.GetCities();
+            var cities = await _repository.GetCitiesAsync();
             return Ok(_mapper.Map<IEnumerable<CityReadDto>>(cities));
         }
 
@@ -60,7 +60,7 @@ namespace DowiezPlBackend.Controllers
         [ProducesResponseType(StatusCodes.Status423Locked)]
         public async Task<ActionResult<CityReadDto>> GetCity(Guid cityId)
         {
-            var city = await _repository.GetCity(cityId);
+            var city = await _repository.GetCityAsync(cityId);
             if (city == null)
                 return NotFound();
             
@@ -85,8 +85,8 @@ namespace DowiezPlBackend.Controllers
         public async Task<ActionResult<CityReadDto>> CreateCity(CityCreateDto cityCreateDto)
         {
             var city = _mapper.Map<City>(cityCreateDto);
-            await _repository.CreateCity(city);
-            if (!await _repository.SaveChanges())
+            _repository.CreateCity(city);
+            if (!await _repository.SaveChangesAsync())
             {
                 return BadRequest();
             }
@@ -113,14 +113,13 @@ namespace DowiezPlBackend.Controllers
         [ProducesResponseType(StatusCodes.Status423Locked)]
         public async Task<ActionResult> UpdateCity(CityUpdateDto cityUpdateDto)
         {
-            var cityFromRepo = await _repository.GetCity(cityUpdateDto.CityId);
+            var cityFromRepo = await _repository.GetCityAsync(cityUpdateDto.CityId);
             if (cityFromRepo == null)
                 return NotFound();
             
             _mapper.Map(cityUpdateDto, cityFromRepo);
-            await _repository.UpdateCity(cityFromRepo);
 
-            if (!await _repository.SaveChanges())
+            if (!await _repository.SaveChangesAsync())
                 return BadRequest();
 
             return NoContent();
@@ -143,12 +142,12 @@ namespace DowiezPlBackend.Controllers
         [ProducesResponseType(StatusCodes.Status423Locked)]
         public async Task<ActionResult> DeleteCity(Guid cityId)
         {
-            var cityFromRepo = await _repository.GetCity(cityId);
+            var cityFromRepo = await _repository.GetCityAsync(cityId);
             if (cityFromRepo == null)
                 return NotFound();
             
-            await _repository.DeleteCity(cityFromRepo);
-            if (!await _repository.SaveChanges())
+            _repository.DeleteCity(cityFromRepo);
+            if (!await _repository.SaveChangesAsync())
                 return BadRequest();
 
             return NoContent();

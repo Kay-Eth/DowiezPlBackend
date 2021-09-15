@@ -12,7 +12,7 @@ namespace DowiezPlBackend.Dtos.Demand
         [Required]
         public DemandCategory Category { get; set; }
 
-        public Guid FromCityId { get; set; }
+        public Guid? FromCityId { get; set; }
         
         [Required]
         public Guid DestinationCityId { get; set; }

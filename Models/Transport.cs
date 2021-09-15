@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using DowiezPlBackend.Enums;
 
 namespace DowiezPlBackend.Models
 {
@@ -18,6 +19,12 @@ namespace DowiezPlBackend.Models
 
         [MaxLength(2000)]
         public string Description { get; set; }
+
+        [Required]
+        public TransportStatus Status { get; set; }
+
+        [Required]
+        public TransportCategory Category { get; set; }
 
         public ICollection<Demand> Demands { get; set; }
 

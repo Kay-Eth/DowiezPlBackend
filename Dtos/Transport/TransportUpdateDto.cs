@@ -1,5 +1,6 @@
 using System;
 using System.ComponentModel.DataAnnotations;
+using DowiezPlBackend.Enums;
 
 namespace DowiezPlBackend.Dtos.Transport
 {
@@ -13,6 +14,9 @@ namespace DowiezPlBackend.Dtos.Transport
 
         [MaxLength(2000)]
         public string Description { get; set; }
+
+        [Required]
+        public TransportCategory Category { get; set; }
 
         [Required]
         public Guid StartsInCityId { get; set; }

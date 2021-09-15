@@ -9,7 +9,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace DowiezPlBackend.Migrations
 {
     [DbContext(typeof(DowiezPlDbContext))]
-    [Migration("20210915090657_InitialMigration")]
+    [Migration("20210915153422_InitialMigration")]
     partial class InitialMigration
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -237,7 +237,7 @@ namespace DowiezPlBackend.Migrations
                     b.HasIndex("ConversationId")
                         .IsUnique();
 
-                    b.ToTable("Group");
+                    b.ToTable("Groups");
                 });
 
             modelBuilder.Entity("DowiezPlBackend.Models.Member", b =>
@@ -258,7 +258,7 @@ namespace DowiezPlBackend.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("Member");
+                    b.ToTable("Members");
                 });
 
             modelBuilder.Entity("DowiezPlBackend.Models.Message", b =>
@@ -321,7 +321,7 @@ namespace DowiezPlBackend.Migrations
 
                     b.ToTable("Opinions");
 
-                    b.HasCheckConstraint("CK_Issuer_cannot_rate_itself", "IssuerId <> RatedId");
+                    b.HasCheckConstraint("CK_Issuer_cannot_rate_himself", "IssuerId <> RatedId");
                 });
 
             modelBuilder.Entity("DowiezPlBackend.Models.Participant", b =>
@@ -377,7 +377,9 @@ namespace DowiezPlBackend.Migrations
 
                     b.HasIndex("ReporterId");
 
-                    b.ToTable("Report");
+                    b.ToTable("Reports");
+
+                    b.HasCheckConstraint("CK_Reporter_cannot_rate_himself", "ReporterId <> ReportedId");
                 });
 
             modelBuilder.Entity("DowiezPlBackend.Models.Transport", b =>
@@ -385,6 +387,9 @@ namespace DowiezPlBackend.Migrations
                     b.Property<Guid>("TransportId")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("char(36)");
+
+                    b.Property<int>("Category")
+                        .HasColumnType("int");
 
                     b.Property<DateTime>("CreationDate")
                         .HasColumnType("datetime(6)");
@@ -402,6 +407,9 @@ namespace DowiezPlBackend.Migrations
                     b.Property<Guid?>("StartsInCityId")
                         .HasColumnType("char(36)");
 
+                    b.Property<int>("Status")
+                        .HasColumnType("int");
+
                     b.Property<DateTime>("TransportDate")
                         .HasColumnType("datetime(6)");
 
@@ -413,7 +421,7 @@ namespace DowiezPlBackend.Migrations
 
                     b.HasIndex("StartsInCityId");
 
-                    b.ToTable("Transport");
+                    b.ToTable("Transports");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<System.Guid>", b =>

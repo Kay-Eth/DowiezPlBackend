@@ -10,8 +10,11 @@ namespace DowiezPlBackend.Data
     {
         public DbSet<City> Cities { get; set; }
         public DbSet<Demand> Demands { get; set; }
+        public DbSet<Group> Groups { get; set; }
+        public DbSet<Member> Members { get; set; }
         public DbSet<Opinion> Opinions { get; set; }
-        
+        public DbSet<Report> Reports { get; set; }
+        public DbSet<Transport> Transports { get; set; }
 
         public DowiezPlDbContext(DbContextOptions<DowiezPlDbContext> opt) : base(opt)
         {
@@ -32,8 +35,14 @@ namespace DowiezPlBackend.Data
             
             builder.Entity<Opinion>()
                 .HasCheckConstraint(
-                    "CK_Issuer_cannot_rate_itself",
+                    "CK_Issuer_cannot_rate_himself",
                     "IssuerId <> RatedId"
+                );
+            
+            builder.Entity<Report>()
+                .HasCheckConstraint(
+                    "CK_Reporter_cannot_rate_himself",
+                    "ReporterId <> ReportedId"
                 );
 
             // builder.Entity<Opinion>()
