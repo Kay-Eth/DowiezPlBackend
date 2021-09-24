@@ -22,6 +22,8 @@ using System.Net.Mime;
 using DowiezPlBackend.Models;
 using System.Reflection;
 using System.IO;
+using System.Net;
+using DowiezPlBackend.Services;
 
 namespace DowiezPlBackend
 {
@@ -37,6 +39,8 @@ namespace DowiezPlBackend
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            services.Configure<MailSettings>(Configuration.GetSection("MailSettings"));
+
             services.AddDbContext<DowiezPlDbContext>(
                 dbContextOptions => dbContextOptions
                     .UseMySql(
@@ -46,6 +50,8 @@ namespace DowiezPlBackend
                     .EnableSensitiveDataLogging()
                     .EnableDetailedErrors()
             );
+
+            services.AddTransient<IMailService, TestMailSendingService>();
 
             services.AddIdentity<AppUser, AppRole>(opt =>
             {

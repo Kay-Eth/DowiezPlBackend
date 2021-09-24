@@ -10,6 +10,7 @@ using DowiezPlBackend.Data;
 using DowiezPlBackend.Dtos.Account;
 using DowiezPlBackend.Exceptions;
 using DowiezPlBackend.Models;
+using DowiezPlBackend.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
@@ -31,6 +32,7 @@ namespace DowiezPlBackend.Controllers
         private readonly IConfiguration _configuration;
 
         private readonly IMapper _mapper;
+        private readonly IMailService _mailService;
         private readonly DowiezPlDbContext _context;
 
         public AccountsController(
@@ -38,12 +40,14 @@ namespace DowiezPlBackend.Controllers
             SignInManager<AppUser> signInManager,
             IConfiguration configuration,
             IMapper mapper,
+            IMailService mailService,
             DowiezPlDbContext context)
         {
             _userManager = userManager;
             _signInManager = signInManager;
             _configuration = configuration;
             _mapper = mapper;
+            _mailService = mailService;
             _context = context;
         }
 
@@ -95,7 +99,7 @@ namespace DowiezPlBackend.Controllers
         [HttpPost("create")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        public async Task<ActionResult<AccountTokenDto>> CreateStandardUser(AccountCreateDto accountCreateDto)
+        public async Task<ActionResult> CreateStandardUser(AccountCreateDto accountCreateDto)
         {
             var user = _mapper.Map<AccountCreateDto, AppUser>(accountCreateDto);
             user.Banned = false;
@@ -108,10 +112,15 @@ namespace DowiezPlBackend.Controllers
             if (result.Succeeded)
             {
                 await _userManager.AddToRoleAsync(user, "Standard");
-                return Ok(await BuildToken(new AccountLoginDto() {
-                    Email = accountCreateDto.Email,
-                    Password = accountCreateDto.Password
-                }));
+                // return Ok(await BuildToken(new AccountLoginDto() {
+                //     Email = accountCreateDto.Email,
+                //     Password = accountCreateDto.Password
+                // }));
+                var email_confirmation_token = await _userManager.GenerateEmailConfirmationTokenAsync(user);
+
+                await _mailService.SendEmailConfirmationAsync(accountCreateDto.Email, user.Id.ToString(), email_confirmation_token);
+
+                return NoContent();
             }
             else
             {
@@ -135,6 +144,7 @@ namespace DowiezPlBackend.Controllers
         {
             var user = _mapper.Map<AccountCreateDto, AppUser>(accountCreateDto);
             user.Banned = false;
+            user.EmailConfirmed = true;
             var userDb = await _userManager.FindByEmailAsync(accountCreateDto.Email);
             if (userDb != null)
                 throw new DowiezPlException("Failed to create account.") { StatusCode = 400 };
@@ -222,6 +232,18 @@ namespace DowiezPlBackend.Controllers
             await _userManager.UpdateAsync(user);
 
             return NoContent();
+        }
+
+        [HttpPost("confirmEmail")]
+        public async Task<ActionResult> ConfirmEmail(AccountEmailConfirmationDto aecDto)
+        {
+            var user = await _userManager.FindByIdAsync(aecDto.UserId);
+            var result = await _userManager.ConfirmEmailAsync(user, aecDto.Token)    ;
+
+            if (result.Succeeded)
+                return NoContent();
+            else
+                throw new DowiezPlException("Failed to confirm email.") { StatusCode = 400 };
         }
         
         private async Task<AccountTokenDto> BuildToken(AccountLoginDto accountLoginDto)
