@@ -42,6 +42,8 @@ namespace DowiezPlBackend.Data
 
         void CreateOpinion(Opinion opinion);
         Task<List<Opinion>> GetOpinionsAsync();
+        Task<List<Opinion>> GetOpinionsAboutUserAsync(string userId);
+        Task<List<Opinion>> GetOpinionsOfUserAsync(string userId);
         Task<Opinion> GetOpinionAsync(Guid opinionId);
         Task<Opinion> GetOpinionNotTrackedAsync(Guid opinionId);
         void DeleteOpinion(Opinion opinion);

@@ -4,6 +4,8 @@ using AutoMapper;
 using DowiezPlBackend.Data;
 using DowiezPlBackend.Dtos.Demand;
 using DowiezPlBackend.Models;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 
@@ -14,6 +16,7 @@ namespace DowiezPlBackend.Controllers
     /// </summary>
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Policy = "NotBanned")]
     public class TestController : DowiezPlControllerBase
     {
         IDowiezPlRepository _repository;
@@ -27,6 +30,20 @@ namespace DowiezPlBackend.Controllers
 
         [HttpGet("Ping")]
         public async Task<ActionResult> Ping()
+        {
+            return await Task.Run(() => Ok("PONG"));
+        }
+
+        [HttpGet("PingStandard")]
+        [Authorize(Roles = "Standard")]
+        public async Task<ActionResult> PingStandard()
+        {
+            return await Task.Run(() => Ok("PONG"));
+        }
+
+        [HttpGet("PingModerator")]
+        [Authorize(Roles = "Moderator,Admin")]
+        public async Task<ActionResult> PingModerator()
         {
             return await Task.Run(() => Ok("PONG"));
         }

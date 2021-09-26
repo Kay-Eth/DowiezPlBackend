@@ -7,8 +7,8 @@ using System.Text;
 using System.Threading.Tasks;
 using AutoMapper;
 using DowiezPlBackend.Data;
+using DowiezPlBackend.Dtos;
 using DowiezPlBackend.Dtos.Account;
-using DowiezPlBackend.Exceptions;
 using DowiezPlBackend.Models;
 using DowiezPlBackend.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -22,9 +22,9 @@ using Newtonsoft.Json;
 
 namespace DowiezPlBackend.Controllers
 {
-    [Produces("application/json")]
-    [Route("/api/[controller]")]
     [ApiController]
+    [Produces("application/json")]
+    [Route("api/[controller]")]
     public class AccountsController : ControllerBase
     {
         private readonly UserManager<AppUser> _userManager;
@@ -51,10 +51,9 @@ namespace DowiezPlBackend.Controllers
             _context = context;
         }
 
-        public static void ThrowIfBanned(AppUser user)
+        public async static Task<bool> CheckIfExistsAsync(string userId, UserManager<AppUser> userManager)
         {
-            if (user.Banned)
-                throw new BannedUserException();
+            return (await userManager.FindByIdAsync(userId)) != null;
         }
         
         /// <summary>
@@ -65,16 +64,15 @@ namespace DowiezPlBackend.Controllers
         /// <response code="404">User not found</response>
         /// <response code="423">User is banned</response>
         [HttpGet]
-        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Policy = "NotBanned")]
         [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        [ProducesResponseType(StatusCodes.Status423Locked)]
         public async Task<ActionResult<AccountReadDto>> GetAccount()
         {
             var userDb = await _userManager.FindByNameAsync(HttpContext.User.Identity.Name);
             if (userDb == null)
                 return NotFound();
-            ThrowIfBanned(userDb);
             
             var accountReadDto = _mapper.Map<AppUser, AccountReadDto>(userDb);
             var role = (await _userManager.GetRolesAsync(userDb))[0];
@@ -85,19 +83,19 @@ namespace DowiezPlBackend.Controllers
             else if (role == "Admin")
                 accountReadDto.Role = Enums.Role.Admin;
             else
-                throw new DowiezPlException($"Role {role} doesn't exist!");
+                return BadRequest(new ErrorMessage($"Role {role} doesn't exist!"));
             
             return Ok(accountReadDto);
         }
 
         /// <summary>
-        /// Creates user with "Standard" role
+        /// Creates user with "Standard" role and sends confirmation email
         /// </summary>
         /// <param name="accountCreateDto">Object with information about new user</param>
-        /// <response code="200">Returns token and expiration timestamp</response>
+        /// <response code="204">User created successfully</response>
         /// <response code="400">Failed to create account</response>
         [HttpPost("create")]
-        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         public async Task<ActionResult> CreateStandardUser(AccountCreateDto accountCreateDto)
         {
@@ -105,7 +103,7 @@ namespace DowiezPlBackend.Controllers
             user.Banned = false;
             var userDb = await _userManager.FindByEmailAsync(accountCreateDto.Email);
             if (userDb != null)
-                throw new DowiezPlException("Failed to create account.") { StatusCode = 400 };
+                return BadRequest(new ErrorMessage("Failed to create account."));
 
             var result = await _userManager.CreateAsync(user, accountCreateDto.Password);
 
@@ -124,7 +122,13 @@ namespace DowiezPlBackend.Controllers
             }
             else
             {
-                throw new DowiezPlException("Failed to create account.") { StatusCode = 400, Detail = JsonConvert.SerializeObject(result.Errors) };
+                // string details = "";
+                // foreach (var error in result.Errors)
+                // {
+                //     details += $"{error.Code}|";
+                // }
+                // details = details.Remove(details.Length - 1);
+                return BadRequest(new ErrorMessage("Failed to create account.", result.Errors));
             }
         }
 
@@ -132,36 +136,33 @@ namespace DowiezPlBackend.Controllers
         /// Creates user with "Moderator" role
         /// </summary>
         /// <param name="accountCreateDto">Object with information about new user</param>
-        /// <response code="200">Returns token and expiration timestamp</response>
+        /// <response code="204">User created successfully</response>
         /// <response code="400">Failed to create account</response>
         /// <response code="401">User not authenticated</response>
         /// <response code="403">User not authorized</response>
         [HttpPost("create/moderator")]
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = "Admin")]
-        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        public async Task<ActionResult<AccountTokenDto>> CreateModeratorUser(AccountCreateDto accountCreateDto)
+        public async Task<ActionResult> CreateModeratorUser(AccountCreateDto accountCreateDto)
         {
             var user = _mapper.Map<AccountCreateDto, AppUser>(accountCreateDto);
             user.Banned = false;
             user.EmailConfirmed = true;
             var userDb = await _userManager.FindByEmailAsync(accountCreateDto.Email);
             if (userDb != null)
-                throw new DowiezPlException("Failed to create account.") { StatusCode = 400 };
+                return BadRequest(new ErrorMessage("Failed to create account."));
 
             var result = await _userManager.CreateAsync(user, accountCreateDto.Password);
 
             if (result.Succeeded)
             {
                 await _userManager.AddToRoleAsync(user, "Moderator");
-                return Ok(await BuildToken(new AccountLoginDto() {
-                    Email = accountCreateDto.Email,
-                    Password = accountCreateDto.Password
-                }));
+                return NoContent();
             }
             else
             {
-                throw new DowiezPlException("Failed to create account.") { StatusCode = 400, Detail = JsonConvert.SerializeObject(result.Errors) };
+                return BadRequest(new ErrorMessage("Failed to create account.", result.Errors));
             }
         }
 
@@ -171,45 +172,44 @@ namespace DowiezPlBackend.Controllers
         /// <param name="accountLoginDto">Object with login informations</param>
         /// <response code="200">Returns token and expiration timestamp</response>
         /// <response code="400">Invalid login attempt</response>
-        /// <response code="423">User is banned</response>
         [HttpPost("login")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        [ProducesResponseType(StatusCodes.Status423Locked)]
         public async Task<ActionResult<AccountTokenDto>> Login(AccountLoginDto accountLoginDto)
         {
             var user = await _userManager.FindByEmailAsync(accountLoginDto.Email);
             if (user == null)
-                throw new InvalidLoginAttemptException();
+                return BadRequest(new ErrorMessage("Login attempt failed."));
+            if (user.Banned)
+                return BadRequest(new ErrorMessage("User is banned."));
 
             var result = await _signInManager.CheckPasswordSignInAsync(user, accountLoginDto.Password, lockoutOnFailure: false);
-
             if (result.Succeeded)
             {
-                ThrowIfBanned(user);
-                return Ok(await BuildToken(accountLoginDto));
+                return Ok(await BuildToken(user));
             }
             else
-                throw new InvalidLoginAttemptException();
+                return BadRequest(new ErrorMessage("Login attempt failed."));
         }
         
         /// <summary>
         /// Returns token after successfull authentication
         /// </summary>
         /// <response code="200">Returns token and expiration timestamp</response>
+        /// <response code="400">Renewing token failed</response>
         /// <response code="401">User not authenticated</response>
         [HttpPost("renewtoken")]
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
         [ProducesResponseType(StatusCodes.Status200OK)]
-        [ProducesResponseType(StatusCodes.Status423Locked)]
         public async Task<ActionResult<AccountTokenDto>> RenewToken()
         {
-            var accountLoginDto = new AccountLoginDto()
-            {
-                Email = HttpContext.User.Identity.Name
-            };
+            var userDb = await _userManager.FindByNameAsync(HttpContext.User.Identity.Name);
+            if (userDb == null)
+                return NotFound();
+            if (userDb.Banned)
+                return BadRequest(new ErrorMessage("User is banned."));
 
-            return Ok(await BuildToken(accountLoginDto));
+            return Ok(await BuildToken(userDb));
         }
 
         /// <summary>
@@ -223,18 +223,28 @@ namespace DowiezPlBackend.Controllers
         /// <response code="403">User not authorized</response>
         [HttpPost("block/{userId}/{status}")]
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = "Moderator,Admin")]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
         public async Task<ActionResult> BlockUser(string userId, bool status)
         {
             var user = await _userManager.FindByIdAsync(userId);
             if (user == null)
-                throw new DowiezPlException("Failed to set banned property.");
+                return NotFound(new ErrorMessage($"User with id {userId} not found."));
             user.Banned = status;
             await _userManager.UpdateAsync(user);
 
             return NoContent();
         }
 
+        /// <summary>
+        /// Confirms email address for an account
+        /// </summary>
+        /// <param name="aecDto">Object with email confirmation information</param>
+        /// <response code="204">Email confirmed successfully</response>
+        /// <response code="400">Request fails</response>
         [HttpPost("confirmEmail")]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
         public async Task<ActionResult> ConfirmEmail(AccountEmailConfirmationDto aecDto)
         {
             var user = await _userManager.FindByIdAsync(aecDto.UserId);
@@ -243,15 +253,7 @@ namespace DowiezPlBackend.Controllers
             if (result.Succeeded)
                 return NoContent();
             else
-                throw new DowiezPlException("Failed to confirm email.") { StatusCode = 400 };
-        }
-        
-        private async Task<AccountTokenDto> BuildToken(AccountLoginDto accountLoginDto)
-        {
-            var user = await _userManager.FindByNameAsync(accountLoginDto.Email);
-            ThrowIfBanned(user);
-            
-            return await BuildToken(user);
+                return BadRequest(new ErrorMessage("Failed to confirm email."));
         }
 
         private async Task<AccountTokenDto> BuildToken(AppUser appUser)

@@ -1,5 +1,4 @@
 using System;
-using DowiezPlBackend.Exceptions;
 using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
@@ -15,20 +14,20 @@ namespace DowiezPlBackend.Controllers
         {
             var context = HttpContext.Features.Get<IExceptionHandlerFeature>();
 
-            if (context.Error is DowiezPlException dpe)
-            {
-                if (dpe.Detail == null)
-                    return Problem(
-                        title: $"{dpe.GetType().Name}: {dpe.Message}",
-                        statusCode: dpe.StatusCode
-                    );
-                else
-                    return Problem(
-                        title: $"{dpe.GetType().Name}: {dpe.Message}",
-                        detail: $"{dpe.Detail}",
-                        statusCode: dpe.StatusCode
-                    );
-            }
+            // if (context.Error is DowiezPlException dpe)
+            // {
+            //     if (dpe.Detail == null)
+            //         return Problem(
+            //             title: $"{dpe.GetType().Name}: {dpe.Message}",
+            //             statusCode: dpe.StatusCode
+            //         );
+            //     else
+            //         return Problem(
+            //             title: $"{dpe.GetType().Name}: {dpe.Message}",
+            //             detail: $"{dpe.Detail}",
+            //             statusCode: dpe.StatusCode
+            //         );
+            // }
 
             return Problem();
         }
@@ -43,14 +42,6 @@ namespace DowiezPlBackend.Controllers
             }
 
             var context = HttpContext.Features.Get<IExceptionHandlerFeature>();
-
-            if (context.Error is DowiezPlException dpe)
-            {
-                return Problem(
-                    title: $"{dpe.GetType()}: {dpe.Message}",
-                    statusCode: dpe.StatusCode
-                );
-            }
 
             if (context.Error is DbUpdateException dbUpdateException)
             {

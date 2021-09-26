@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using AutoMapper;
 using DowiezPlBackend.Data;
+using DowiezPlBackend.Dtos;
 using DowiezPlBackend.Dtos.City;
 using DowiezPlBackend.Models;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -13,9 +14,6 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace DowiezPlBackend.Controllers
 {
-    [Produces("application/json")]
-    [Route("api/[controller]")]
-    [ApiController]
     public class CitiesController : DowiezPlControllerBase
     {
         IDowiezPlRepository _repository;
@@ -27,37 +25,26 @@ namespace DowiezPlBackend.Controllers
             _mapper = mapper;
         }
 
-        // GET api/Cities
         /// <summary>
         /// Returns data of all cities
         /// </summary>
-        /// <response code="200">Returns object with data of all cities</response>
-        /// <response code="401">User not authenticated</response>
-        /// <response code="423">User is banned</response>
+        /// <response code="200">Returns an array of all cities</response>
         [HttpGet]
-        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
-        [ProducesResponseType(StatusCodes.Status200OK)]
-        [ProducesResponseType(StatusCodes.Status423Locked)]
+        [ProducesResponseType(typeof(IEnumerable<CityReadDto>), StatusCodes.Status200OK)]
         public async Task<ActionResult<IEnumerable<CityReadDto>>> GetCities()
         {
-            await CheckUser();
             var cities = await _repository.GetCitiesAsync();
             return Ok(_mapper.Map<IEnumerable<CityReadDto>>(cities));
         }
 
-        // GET api/Cities/{cityId}
         /// <summary>
-        /// Returns data of all cities
+        /// Returns data of a city
         /// </summary>
         /// <param name="cityId">City's id</param>
-        /// <response code="200">Returns object with data of all cities</response>
-        /// <response code="401">User not authenticated</response>
+        /// <response code="200">Returns data of a city</response>
         /// <response code="404">City not exits</response>
-        /// <response code="423">User is banned</response>
         [HttpGet("{cityId}", Name = "GetCity")]
-        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
-        [ProducesResponseType(StatusCodes.Status200OK)]
-        [ProducesResponseType(StatusCodes.Status423Locked)]
+        [ProducesResponseType(typeof(CityReadDto), StatusCodes.Status200OK)]
         public async Task<ActionResult<CityReadDto>> GetCity(Guid cityId)
         {
             var city = await _repository.GetCityAsync(cityId);
@@ -67,21 +54,15 @@ namespace DowiezPlBackend.Controllers
             return Ok(_mapper.Map<CityReadDto>(city));
         }
 
-        // POST api/Cities
         /// <summary>
         /// Creates new City
         /// </summary>
         /// <param name="cityCreateDto">New city's data</param>
         /// <response code="201">City was created successfully</response>
         /// <response code="400">Creation of city failed</response>
-        /// <response code="401">User not authenticated</response>
-        /// <response code="403">User not authorized</response>
-        /// <response code="423">User is banned</response>
         [HttpPost]
-        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = "Admin")]
+        [Authorize(Roles = "Admin")]
         [ProducesResponseType(StatusCodes.Status201Created)]
-        [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        [ProducesResponseType(StatusCodes.Status423Locked)]
         public async Task<ActionResult<CityReadDto>> CreateCity(CityCreateDto cityCreateDto)
         {
             var city = _mapper.Map<City>(cityCreateDto);
@@ -92,25 +73,19 @@ namespace DowiezPlBackend.Controllers
             }
 
             var cityReadDto = _mapper.Map<CityReadDto>(city);
-            
             return CreatedAtRoute(nameof(GetCity), new { cityId = cityReadDto.CityId }, cityReadDto);
         }
 
-        // PUT api/Cities
         /// <summary>
         /// Updates a City
         /// </summary>
         /// <param name="cityUpdateDto">City's new data</param>
         /// <response code="204">City was updated successfully</response>
         /// <response code="400">Update of city failed</response>
-        /// <response code="401">User not authenticated</response>
-        /// <response code="403">User not authorized</response>
-        /// <response code="423">User is banned</response>
+        /// <response code="404">City not found</response>
         [HttpPut]
-        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = "Admin")]
-        [ProducesResponseType(StatusCodes.Status204NoContent)]
-        [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        [ProducesResponseType(StatusCodes.Status423Locked)]
+        [Authorize(Roles = "Admin")]
+        [ProducesResponseType(typeof(IEnumerable<CityReadDto>), StatusCodes.Status204NoContent)]
         public async Task<ActionResult> UpdateCity(CityUpdateDto cityUpdateDto)
         {
             var cityFromRepo = await _repository.GetCityAsync(cityUpdateDto.CityId);
@@ -125,21 +100,16 @@ namespace DowiezPlBackend.Controllers
             return NoContent();
         }
 
-        // DELETE api/Cities/{cityId}
         /// <summary>
         /// Deletes a City
         /// </summary>
         /// <param name="cityId">City's id</param>
         /// <response code="204">City was deleted successfully</response>
         /// <response code="400">Update of city failed</response>
-        /// <response code="401">User not authenticated</response>
-        /// <response code="403">User not authorized</response>
-        /// <response code="423">User is banned</response>
+        /// <response code="404">City not found</response>
         [HttpDelete("{cityId}")]
-        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = "Admin")]
+        [Authorize(Roles = "Admin")]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
-        [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        [ProducesResponseType(StatusCodes.Status423Locked)]
         public async Task<ActionResult> DeleteCity(Guid cityId)
         {
             var cityFromRepo = await _repository.GetCityAsync(cityId);

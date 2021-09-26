@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Claims;
 using System.Threading.Tasks;
 using DowiezPlBackend.Models;
 using Microsoft.AspNetCore.Hosting;
@@ -45,6 +46,7 @@ namespace DowiezPlBackend
                         };
                         await userManager.CreateAsync(user, "DefaultPassword@123");
                         await userManager.AddToRoleAsync(user, "Admin");
+                        await userManager.AddClaimAsync(user, new Claim("Banned", "false"));
                     }
                 }
                 catch (Exception e)

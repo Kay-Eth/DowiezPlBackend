@@ -24,6 +24,8 @@ using System.Reflection;
 using System.IO;
 using System.Net;
 using DowiezPlBackend.Services;
+using DowiezPlBackend.Policies;
+using Microsoft.AspNetCore.Authorization;
 
 namespace DowiezPlBackend
 {
@@ -65,6 +67,13 @@ namespace DowiezPlBackend
                 .AddEntityFrameworkStores<DowiezPlDbContext>()
                 .AddDefaultTokenProviders();
             
+            services.AddAuthorization(options =>
+            {
+                options.AddPolicy("NotBanned", policy =>
+                    policy.Requirements.Add(new NotBannedRequirement()));
+            });
+            services.AddTransient<IAuthorizationHandler, NotBannedHandler>();
+            
             services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
                 .AddJwtBearer(options => {
                     options.TokenValidationParameters = new Microsoft.IdentityModel.Tokens.TokenValidationParameters()
@@ -79,6 +88,8 @@ namespace DowiezPlBackend
                         ClockSkew = TimeSpan.Zero
                     };
                 });
+            
+            
 
             services.AddControllers()
                 // .ConfigureApiBehaviorOptions(options => 
