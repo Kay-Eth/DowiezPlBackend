@@ -9,10 +9,13 @@ namespace DowiezPlBackend.Data
     public class DowiezPlDbContext : IdentityDbContext<AppUser, AppRole, Guid>
     {
         public DbSet<City> Cities { get; set; }
+        public DbSet<Conversation> Conversations { get; set; }
         public DbSet<Demand> Demands { get; set; }
         public DbSet<Group> Groups { get; set; }
         public DbSet<Member> Members { get; set; }
+        public DbSet<Message> Messages { get; set; }
         public DbSet<Opinion> Opinions { get; set; }
+        public DbSet<Participant> Participants { get; set; }
         public DbSet<Report> Reports { get; set; }
         public DbSet<Transport> Transports { get; set; }
 

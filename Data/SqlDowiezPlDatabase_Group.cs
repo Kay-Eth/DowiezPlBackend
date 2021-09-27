@@ -24,6 +24,7 @@ namespace DowiezPlBackend.Data
                 .Include(g => g.LimitedBy)
                 .Include(g => g.Members)
                 .Include(g => g.GroupConversation)
+                .Include(g => g.Creator)
                 .FirstOrDefaultAsync(g => g.GroupId == groupId);
         }
 
@@ -33,6 +34,7 @@ namespace DowiezPlBackend.Data
                 .Include(g => g.LimitedBy)
                 .Include(g => g.Members)
                 .Include(g => g.GroupConversation)
+                .Include(g => g.Creator)
                 .FirstOrDefaultAsync(g => g.GroupId == groupId);
         }
 
@@ -42,6 +44,7 @@ namespace DowiezPlBackend.Data
                 .Include(g => g.LimitedBy)
                 .Include(g => g.Members)
                 .Include(g => g.GroupConversation)
+                .Include(g => g.Creator)
                 .ToListAsync();
         }
 

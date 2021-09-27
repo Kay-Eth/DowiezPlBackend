@@ -40,6 +40,8 @@ namespace DowiezPlBackend.Data
         Task<List<Member>> GetGroupMembersAsync(Guid groupId);
         void DeleteMember(Member member);
 
+        Task<bool> IsUserAMemberOfAGroup(Guid userId, Guid groupId);
+
         void CreateOpinion(Opinion opinion);
         Task<List<Opinion>> GetOpinionsAsync();
         Task<List<Opinion>> GetOpinionsAboutUserAsync(string userId);
@@ -64,5 +66,7 @@ namespace DowiezPlBackend.Data
         Task<Transport> GetTransportAsync(Guid transportId);
         Task<Transport> GetTransportNotTrackedAsync(Guid transportId);
         void DeleteTransport(Transport transport);
+
+        void CreateConversation(Conversation conversation);
     }
 }

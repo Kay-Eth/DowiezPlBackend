@@ -85,7 +85,7 @@ namespace DowiezPlBackend.Migrations
                 .Annotation("MySql:CharSet", "utf8mb4");
 
             migrationBuilder.CreateTable(
-                name: "Conversation",
+                name: "Conversations",
                 columns: table => new
                 {
                     ConversationId = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
@@ -93,7 +93,7 @@ namespace DowiezPlBackend.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Conversation", x => x.ConversationId);
+                    table.PrimaryKey("PK_Conversations", x => x.ConversationId);
                 })
                 .Annotation("MySql:CharSet", "utf8mb4");
 
@@ -330,22 +330,29 @@ namespace DowiezPlBackend.Migrations
                         .Annotation("MySql:CharSet", "utf8mb4"),
                     Description = table.Column<string>(type: "varchar(2000)", maxLength: 2000, nullable: true)
                         .Annotation("MySql:CharSet", "utf8mb4"),
+                    CreatorId = table.Column<Guid>(type: "char(36)", nullable: true, collation: "ascii_general_ci"),
                     ConversationId = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci")
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Groups", x => x.GroupId);
                     table.ForeignKey(
-                        name: "FK_Groups_Conversation_ConversationId",
+                        name: "FK_Groups_AspNetUsers_CreatorId",
+                        column: x => x.CreatorId,
+                        principalTable: "AspNetUsers",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
+                        name: "FK_Groups_Conversations_ConversationId",
                         column: x => x.ConversationId,
-                        principalTable: "Conversation",
+                        principalTable: "Conversations",
                         principalColumn: "ConversationId",
                         onDelete: ReferentialAction.Cascade);
                 })
                 .Annotation("MySql:CharSet", "utf8mb4");
 
             migrationBuilder.CreateTable(
-                name: "Message",
+                name: "Messages",
                 columns: table => new
                 {
                     MessageId = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
@@ -357,24 +364,24 @@ namespace DowiezPlBackend.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Message", x => x.MessageId);
+                    table.PrimaryKey("PK_Messages", x => x.MessageId);
                     table.ForeignKey(
-                        name: "FK_Message_AspNetUsers_SenderId",
+                        name: "FK_Messages_AspNetUsers_SenderId",
                         column: x => x.SenderId,
                         principalTable: "AspNetUsers",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
-                        name: "FK_Message_Conversation_ConversationId",
+                        name: "FK_Messages_Conversations_ConversationId",
                         column: x => x.ConversationId,
-                        principalTable: "Conversation",
+                        principalTable: "Conversations",
                         principalColumn: "ConversationId",
                         onDelete: ReferentialAction.Cascade);
                 })
                 .Annotation("MySql:CharSet", "utf8mb4");
 
             migrationBuilder.CreateTable(
-                name: "Participant",
+                name: "Participants",
                 columns: table => new
                 {
                     ParticipantId = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
@@ -383,17 +390,17 @@ namespace DowiezPlBackend.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Participant", x => x.ParticipantId);
+                    table.PrimaryKey("PK_Participants", x => x.ParticipantId);
                     table.ForeignKey(
-                        name: "FK_Participant_AspNetUsers_UserId",
+                        name: "FK_Participants_AspNetUsers_UserId",
                         column: x => x.UserId,
                         principalTable: "AspNetUsers",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_Participant_Conversation_ConversationId",
+                        name: "FK_Participants_Conversations_ConversationId",
                         column: x => x.ConversationId,
-                        principalTable: "Conversation",
+                        principalTable: "Conversations",
                         principalColumn: "ConversationId",
                         onDelete: ReferentialAction.Cascade);
                 })
@@ -564,6 +571,11 @@ namespace DowiezPlBackend.Migrations
                 unique: true);
 
             migrationBuilder.CreateIndex(
+                name: "IX_Groups_CreatorId",
+                table: "Groups",
+                column: "CreatorId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Members_GroupId",
                 table: "Members",
                 column: "GroupId");
@@ -574,13 +586,13 @@ namespace DowiezPlBackend.Migrations
                 column: "UserId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Message_ConversationId",
-                table: "Message",
+                name: "IX_Messages_ConversationId",
+                table: "Messages",
                 column: "ConversationId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Message_SenderId",
-                table: "Message",
+                name: "IX_Messages_SenderId",
+                table: "Messages",
                 column: "SenderId");
 
             migrationBuilder.CreateIndex(
@@ -595,13 +607,13 @@ namespace DowiezPlBackend.Migrations
                 column: "RatedId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Participant_ConversationId",
-                table: "Participant",
+                name: "IX_Participants_ConversationId",
+                table: "Participants",
                 column: "ConversationId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Participant_UserId",
-                table: "Participant",
+                name: "IX_Participants_UserId",
+                table: "Participants",
                 column: "UserId");
 
             migrationBuilder.CreateIndex(
@@ -654,13 +666,13 @@ namespace DowiezPlBackend.Migrations
                 name: "Members");
 
             migrationBuilder.DropTable(
-                name: "Message");
+                name: "Messages");
 
             migrationBuilder.DropTable(
                 name: "Opinions");
 
             migrationBuilder.DropTable(
-                name: "Participant");
+                name: "Participants");
 
             migrationBuilder.DropTable(
                 name: "Reports");
@@ -675,13 +687,13 @@ namespace DowiezPlBackend.Migrations
                 name: "Groups");
 
             migrationBuilder.DropTable(
-                name: "AspNetUsers");
-
-            migrationBuilder.DropTable(
                 name: "Cities");
 
             migrationBuilder.DropTable(
-                name: "Conversation");
+                name: "AspNetUsers");
+
+            migrationBuilder.DropTable(
+                name: "Conversations");
         }
     }
 }

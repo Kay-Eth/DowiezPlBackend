@@ -26,6 +26,9 @@ namespace DowiezPlBackend.Models
         public ICollection<Member> Members { get; set; }
 
         [Required]
+        public AppUser Creator { get; set; }
+
+        [Required]
         [ForeignKey("ConversationId")]
         public Conversation GroupConversation { get; set; }
     }

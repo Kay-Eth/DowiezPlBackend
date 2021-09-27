@@ -50,5 +50,22 @@ namespace DowiezPlBackend.Data
 
             _context.Members.Remove(member);
         }
+
+        public async Task<bool> IsUserAMemberOfAGroup(Guid userId, Guid groupId)
+        {
+            return await _context.Members.AsNoTracking()
+                .Include(m => m.Group)
+                .Include(m => m.User)
+                .FirstOrDefaultAsync(m => m.Group.GroupId == groupId && m.User.Id == userId) != null;
+
+            // foreach (var member in group.Members)
+            // {
+            //     if ((await GetMemberNotTrackedAsync(member.MemberId))?.User.Id == user.Id)
+            //     {
+            //         return true;
+            //     }
+            // }
+            // return false;
+        }
     }
 }

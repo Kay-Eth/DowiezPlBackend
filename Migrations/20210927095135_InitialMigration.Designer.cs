@@ -9,7 +9,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace DowiezPlBackend.Migrations
 {
     [DbContext(typeof(DowiezPlDbContext))]
-    [Migration("20210915153422_InitialMigration")]
+    [Migration("20210927095135_InitialMigration")]
     partial class InitialMigration
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -154,7 +154,7 @@ namespace DowiezPlBackend.Migrations
 
                     b.HasKey("ConversationId");
 
-                    b.ToTable("Conversation");
+                    b.ToTable("Conversations");
                 });
 
             modelBuilder.Entity("DowiezPlBackend.Models.Demand", b =>
@@ -223,6 +223,9 @@ namespace DowiezPlBackend.Migrations
                     b.Property<DateTime>("CreationDate")
                         .HasColumnType("datetime(6)");
 
+                    b.Property<Guid?>("CreatorId")
+                        .HasColumnType("char(36)");
+
                     b.Property<string>("Description")
                         .HasMaxLength(2000)
                         .HasColumnType("varchar(2000)");
@@ -236,6 +239,8 @@ namespace DowiezPlBackend.Migrations
 
                     b.HasIndex("ConversationId")
                         .IsUnique();
+
+                    b.HasIndex("CreatorId");
 
                     b.ToTable("Groups");
                 });
@@ -287,7 +292,7 @@ namespace DowiezPlBackend.Migrations
 
                     b.HasIndex("SenderId");
 
-                    b.ToTable("Message");
+                    b.ToTable("Messages");
                 });
 
             modelBuilder.Entity("DowiezPlBackend.Models.Opinion", b =>
@@ -342,7 +347,7 @@ namespace DowiezPlBackend.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("Participant");
+                    b.ToTable("Participants");
                 });
 
             modelBuilder.Entity("DowiezPlBackend.Models.Report", b =>
@@ -571,6 +576,12 @@ namespace DowiezPlBackend.Migrations
                         .HasForeignKey("DowiezPlBackend.Models.Group", "ConversationId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.HasOne("DowiezPlBackend.Models.AppUser", "Creator")
+                        .WithMany()
+                        .HasForeignKey("CreatorId");
+
+                    b.Navigation("Creator");
 
                     b.Navigation("GroupConversation");
                 });
