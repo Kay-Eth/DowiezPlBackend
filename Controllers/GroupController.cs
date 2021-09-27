@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using AutoMapper;
 using DowiezPlBackend.Data;
+using DowiezPlBackend.Dtos;
 using DowiezPlBackend.Dtos.Group;
 using DowiezPlBackend.Models;
 using Microsoft.AspNetCore.Authorization;
@@ -71,6 +72,7 @@ namespace DowiezPlBackend.Controllers
         [HttpPost]
         [Authorize(Roles = "Standard")]
         [ProducesResponseType(StatusCodes.Status201Created)]
+        [ProducesResponseType(typeof(ErrorMessage), StatusCodes.Status400BadRequest)]
         public async Task<ActionResult<GroupReadDto>> CreateGroup(GroupCreateDto groupCreateDto)
         {
             var user = await GetMyUserAsync();
@@ -90,9 +92,7 @@ namespace DowiezPlBackend.Controllers
             _repository.CreateGroup(group);
 
             if (!await _repository.SaveChangesAsync())
-            {
-                return BadRequest("Creation of an opinion failed");
-            }
+                return BadRequest(new ErrorMessage("Failed to create a group.", "GC_CG_1"));
 
             var groupReadDto = _mapper.Map<GroupReadDto>(group);
             return CreatedAtRoute(nameof(GetGroup), new { groupId = groupReadDto.GroupId }, groupReadDto);
@@ -109,6 +109,7 @@ namespace DowiezPlBackend.Controllers
         [HttpPut]
         [Authorize(Roles = "Standard")]
         [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ErrorMessage), StatusCodes.Status400BadRequest)]
         public async Task<ActionResult<GroupReadDto>> UpdateGroup(GroupUpdateDto groupUpdateDto)
         {
             var groupFromRepo = await _repository.GetGroupAsync(groupUpdateDto.GroupId);
@@ -123,7 +124,7 @@ namespace DowiezPlBackend.Controllers
             _mapper.Map(groupUpdateDto, groupFromRepo);
 
             if (!await _repository.SaveChangesAsync())
-                return BadRequest();
+                return BadRequest(new ErrorMessage("Failed to update a group.", "GC_UG_1"));
 
             return Ok(_mapper.Map<GroupReadDto>(groupFromRepo));
         }
@@ -138,6 +139,7 @@ namespace DowiezPlBackend.Controllers
         /// <response code="404">Group not found</response>
         [HttpDelete("{groupId}")]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(typeof(ErrorMessage), StatusCodes.Status400BadRequest)]
         public async Task<ActionResult> DeleteGroup(Guid groupId)
         {
             var groupFromRepo = await _repository.GetGroupAsync(groupId);
@@ -155,7 +157,7 @@ namespace DowiezPlBackend.Controllers
             _repository.DeleteGroup(groupFromRepo);
 
             if (!await _repository.SaveChangesAsync())
-                return BadRequest();
+                return BadRequest(new ErrorMessage("Failed to delete a group.", "GC_DG_1"));
 
             return NoContent();
         }

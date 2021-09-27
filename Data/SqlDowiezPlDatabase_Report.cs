@@ -49,5 +49,14 @@ namespace DowiezPlBackend.Data
             
             _context.Reports.Remove(report);
         }
+
+        public async Task<List<Report>> GetUserReportsAsync(Guid userId)
+        {
+            return await _context.Reports.AsNoTracking()
+                .Include(r => r.Reporter)
+                .Include(r => r.Reported)
+                .Where(r => r.Reporter.Id == userId)
+                .ToListAsync();
+        }
     }
 }

@@ -108,10 +108,10 @@ namespace DowiezPlBackend.Controllers
             var issuer = await GetMyUserAsync();
             var rated = await GetUserAsync(opinionCreateDto.RatedId.ToString());
             if (rated == null)
-                return BadRequest(new ErrorMessage("Creation of an opinion failed"));
+                return BadRequest(new ErrorMessage("Failed to create an opinion.", "OC_CO_1"));
             
             if (await IsModerator(rated))
-                return BadRequest(new ErrorMessage("Creation of an opinion failed"));
+                return BadRequest(new ErrorMessage("Failed to create an opinion.", "OC_CO_2"));
             
             var opinion = _mapper.Map<Opinion>(opinionCreateDto);
             opinion.CreationDate = System.DateTime.UtcNow;
@@ -120,12 +120,9 @@ namespace DowiezPlBackend.Controllers
 
             _repository.CreateOpinion(opinion);
             if (!await _repository.SaveChangesAsync())
-            {
-                return BadRequest("Creation of an opinion failed");
-            }
+                return BadRequest(new ErrorMessage("Failed to create an opinion.", "OC_CO_3"));
 
             var opinionReadDto = _mapper.Map<OpinionReadDto>(opinion);
-
             return CreatedAtRoute(nameof(GetOpinion), new { opinionId = opinionReadDto.OpinionId }, opinionReadDto);
         }
 
@@ -140,6 +137,7 @@ namespace DowiezPlBackend.Controllers
         [HttpPut]
         [Authorize(Roles = "Standard")]
         [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ErrorMessage), StatusCodes.Status400BadRequest)]
         public async Task<ActionResult<OpinionReadDto>> UpdateOpinion(OpinionUpdateDto opinionUpdateDto)
         {
             var opinionFromRepo = await _repository.GetOpinionAsync(opinionUpdateDto.OpinionId);
@@ -154,7 +152,7 @@ namespace DowiezPlBackend.Controllers
             _mapper.Map(opinionUpdateDto, opinionFromRepo);
 
             if (!await _repository.SaveChangesAsync())
-                return BadRequest();
+                return BadRequest(new ErrorMessage("Failed to update an opinion.", "OC_UO_1"));
 
             return Ok(_mapper.Map<OpinionReadDto>(opinionFromRepo));
         }
@@ -169,6 +167,7 @@ namespace DowiezPlBackend.Controllers
         /// <response code="404">Opinion not found</response>
         [HttpDelete("{opinionId}")]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(typeof(ErrorMessage), StatusCodes.Status400BadRequest)]
         public async Task<ActionResult> DeleteOpinion(Guid opinionId)
         {
             var opinionFromRepo = await _repository.GetOpinionAsync(opinionId);
@@ -187,7 +186,7 @@ namespace DowiezPlBackend.Controllers
             _repository.DeleteOpinion(opinionFromRepo);
 
             if (!await _repository.SaveChangesAsync())
-                return BadRequest();
+                return BadRequest(new ErrorMessage("Failed to delete an opinion.", "OC_DO_1"));
 
             return NoContent();
         }

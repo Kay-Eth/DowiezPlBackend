@@ -63,14 +63,13 @@ namespace DowiezPlBackend.Controllers
         [HttpPost]
         [Authorize(Roles = "Admin")]
         [ProducesResponseType(StatusCodes.Status201Created)]
+        [ProducesResponseType(typeof(ErrorMessage), StatusCodes.Status400BadRequest)]
         public async Task<ActionResult<CityReadDto>> CreateCity(CityCreateDto cityCreateDto)
         {
             var city = _mapper.Map<City>(cityCreateDto);
             _repository.CreateCity(city);
             if (!await _repository.SaveChangesAsync())
-            {
-                return BadRequest();
-            }
+                return BadRequest(new ErrorMessage("Failed to create a city.", "CC_CC_1"));
 
             var cityReadDto = _mapper.Map<CityReadDto>(city);
             return CreatedAtRoute(nameof(GetCity), new { cityId = cityReadDto.CityId }, cityReadDto);
@@ -85,7 +84,8 @@ namespace DowiezPlBackend.Controllers
         /// <response code="404">City not found</response>
         [HttpPut]
         [Authorize(Roles = "Admin")]
-        [ProducesResponseType(typeof(IEnumerable<CityReadDto>), StatusCodes.Status204NoContent)]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(typeof(ErrorMessage), StatusCodes.Status400BadRequest)]
         public async Task<ActionResult> UpdateCity(CityUpdateDto cityUpdateDto)
         {
             var cityFromRepo = await _repository.GetCityAsync(cityUpdateDto.CityId);
@@ -95,7 +95,7 @@ namespace DowiezPlBackend.Controllers
             _mapper.Map(cityUpdateDto, cityFromRepo);
 
             if (!await _repository.SaveChangesAsync())
-                return BadRequest();
+                return BadRequest(new ErrorMessage("Failed to update a city.", "CC_UC_1"));
 
             return NoContent();
         }
@@ -110,6 +110,7 @@ namespace DowiezPlBackend.Controllers
         [HttpDelete("{cityId}")]
         [Authorize(Roles = "Admin")]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(typeof(ErrorMessage), StatusCodes.Status400BadRequest)]
         public async Task<ActionResult> DeleteCity(Guid cityId)
         {
             var cityFromRepo = await _repository.GetCityAsync(cityId);
@@ -118,7 +119,7 @@ namespace DowiezPlBackend.Controllers
             
             _repository.DeleteCity(cityFromRepo);
             if (!await _repository.SaveChangesAsync())
-                return BadRequest();
+                return BadRequest(new ErrorMessage("Failed to delete a city.", "CC_DC_1"));
 
             return NoContent();
         }
