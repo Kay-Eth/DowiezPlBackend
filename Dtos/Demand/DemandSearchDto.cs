@@ -8,10 +8,10 @@ namespace DowiezPlBackend.Dtos.Demand
     public class DemandSearchDto
     {
         [Required]
-        ICollection<DemandCategory> Categories { get; set; }
-        Guid? FromCityId { get; set; }
+        public ICollection<DemandCategory> Categories { get; set; }
+        public Guid? FromCityId { get; set; }
         [Required]
-        Guid DestinationCityId { get; set; }
-        Guid? LimitedToGroupId { get; set; }
+        public Guid DestinationCityId { get; set; }
+        public Guid? LimitedToGroupId { get; set; }
     }
 }

@@ -34,9 +34,7 @@ namespace DowiezPlBackend.Data
                 .Include(u => u.Reciever)
                 .Include(t => t.Transport)
                 .Include(g => g.LimitedTo)
-                .Where(d => (d.Status == DemandStatus.Created
-                        || d.Status == DemandStatus.TransportProposed
-                        || d.Status == DemandStatus.TransportRequested)
+                .Where(d => d.Status == DemandStatus.Created
                     && categories.Contains(d.Category)
                     && (fromCityId == null ? true : (d.From == null ? true : d.From.CityId == fromCityId))
                     && destinationCityId == d.Destination.CityId
