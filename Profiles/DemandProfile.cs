@@ -9,6 +9,7 @@ namespace DowiezPlBackend.Profiles
         public DemandProfile()
         {
             CreateMap<Demand, DemandReadDto>();
+            CreateMap<Demand, DemandSimpleReadDto>();
             CreateMap<DemandCreateDto, Demand>();
             CreateMap<DemandUpdateDto, Demand>();
         }

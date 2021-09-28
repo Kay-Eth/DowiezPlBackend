@@ -69,7 +69,7 @@ namespace DowiezPlBackend.Controllers
         /// <summary>
         /// Returns demands created by a user
         /// </summary>
-        /// <param name="userId"></param>
+        /// <param name="userId">User's Id</param>
         /// <response code="200">Returns array of demands</response>
         /// <response code="404">User not found</response>
         [HttpGet("user/{userId}")]
@@ -82,6 +82,33 @@ namespace DowiezPlBackend.Controllers
                 return NotFound();
             var results = _repository.GetUserDemandsAsync(userId);
             return Ok(_mapper.Map<IEnumerable<DemandSimpleReadDto>>(results));
+        }
+
+        /// <summary>
+        /// Returns data of a demand
+        /// </summary>
+        /// <param name="demandId"></param>
+        /// <response code="200">Returns data of demands</response>
+        /// <response code="403">Demand is limited to a group, that you don't have access to</response>
+        /// <response code="404">Demand not found</response>
+        [HttpGet("{demandId}")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        public async Task<ActionResult<DemandReadDto>> GetDemand(Guid demandId)
+        {
+            var demandFromRepo = await _repository.GetDemandNotTrackedAsync(demandId);
+            if (demandFromRepo == null)
+                return NotFound();
+            
+            if (demandFromRepo.LimitedTo != null)
+            {
+                var user = await GetMyUserAsync();
+                if (!(await IsModerator(user) || await _repository.IsUserAMemberOfAGroup(user.Id, (Guid)(demandFromRepo.LimitedTo.GroupId))))
+                {
+                    return Forbid();
+                }
+            }
+
+            return Ok(_mapper.Map<DemandReadDto>(demandFromRepo));
         }
     }
 }

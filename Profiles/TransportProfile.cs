@@ -9,6 +9,7 @@ namespace DowiezPlBackend.Profiles
         public TransportProfile()
         {
             CreateMap<Transport, TransportReadDto>();
+            CreateMap<Transport, TransportSimpleReadDto>();
             CreateMap<TransportCreateDto, Transport>();
             CreateMap<TransportUpdateDto, Transport>();
         }
