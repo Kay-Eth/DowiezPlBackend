@@ -36,6 +36,16 @@
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Server"
       }
+    },
+    "DowiezPlBackend_VPS": {
+      "commandName": "Project",
+      "dotnetRunMessages": "true",
+      "launchBrowser": true,
+      "launchUrl": "swagger",
+      "applicationUrl": "https://dowiez.pl:5001;http://dowiez.pl:5000",
+      "environmentVariables": {
+        "ASPNETCORE_ENVIRONMENT": "Server"
+      }
     }
   }
 }
