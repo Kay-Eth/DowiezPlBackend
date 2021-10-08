@@ -35,7 +35,7 @@ namespace DowiezPlBackend.Controllers
         [Route("/error-dev")]
         public ActionResult ErrorLocalDevelopment([FromServices] IWebHostEnvironment webHostEnvironment)
         {
-            if (webHostEnvironment.EnvironmentName != "Development" && webHostEnvironment.EnvironmentName != "Server")
+            if (webHostEnvironment.EnvironmentName != "Development" && webHostEnvironment.EnvironmentName != "Server" && webHostEnvironment.EnvironmentName != "VPS")
             {
                 throw new InvalidOperationException(
                     "This shouldn't be invoked in non-development environments.");

@@ -171,7 +171,7 @@ namespace DowiezPlBackend
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
-            if (env.IsDevelopment() || env.IsEnvironment("Server"))
+            if (env.IsDevelopment() || env.IsEnvironment("Server") || env.IsEnvironment("VPS"))
             {
                 // app.UseDeveloperExceptionPage();
                 app.UseExceptionHandler("/error-dev");
