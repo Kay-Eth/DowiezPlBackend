@@ -189,6 +189,8 @@ namespace DowiezPlBackend
 
             app.UseRouting();
 
+            app.UseCors("AllowDevClient");
+
             app.UseAuthorization();
             app.UseAuthentication();
 
