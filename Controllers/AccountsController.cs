@@ -66,7 +66,7 @@ namespace DowiezPlBackend.Controllers
         [HttpGet]
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Policy = "NotBanned")]
         [ProducesResponseType(StatusCodes.Status200OK)]
-        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(typeof(ErrorMessage), StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<ActionResult<AccountReadDto>> GetAccount()
         {
@@ -96,7 +96,7 @@ namespace DowiezPlBackend.Controllers
         /// <response code="400">Failed to create account</response>
         [HttpPost("create")]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
-        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(typeof(ErrorMessage), StatusCodes.Status400BadRequest)]
         public async Task<ActionResult> CreateStandardUser(AccountCreateDto accountCreateDto)
         {
             var user = _mapper.Map<AccountCreateDto, AppUser>(accountCreateDto);
@@ -143,7 +143,7 @@ namespace DowiezPlBackend.Controllers
         [HttpPost("create/moderator")]
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = "Admin")]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
-        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(typeof(ErrorMessage), StatusCodes.Status400BadRequest)]
         public async Task<ActionResult> CreateModeratorUser(AccountCreateDto accountCreateDto)
         {
             var user = _mapper.Map<AccountCreateDto, AppUser>(accountCreateDto);
@@ -174,7 +174,7 @@ namespace DowiezPlBackend.Controllers
         /// <response code="400">Invalid login attempt</response>
         [HttpPost("login")]
         [ProducesResponseType(StatusCodes.Status200OK)]
-        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(typeof(ErrorMessage), StatusCodes.Status400BadRequest)]
         public async Task<ActionResult<AccountTokenDto>> Login(AccountLoginDto accountLoginDto)
         {
             var user = await _userManager.FindByEmailAsync(accountLoginDto.Email);
@@ -224,7 +224,7 @@ namespace DowiezPlBackend.Controllers
         [HttpPost("block/{userId}/{status}")]
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = "Moderator,Admin")]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
-        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<ActionResult> BlockUser(string userId, bool status)
         {
             var user = await _userManager.FindByIdAsync(userId);
@@ -244,7 +244,7 @@ namespace DowiezPlBackend.Controllers
         /// <response code="400">Request fails</response>
         [HttpPost("confirmEmail")]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
-        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(typeof(ErrorMessage), StatusCodes.Status400BadRequest)]
         public async Task<ActionResult> ConfirmEmail(AccountEmailConfirmationDto aecDto)
         {
             var user = await _userManager.FindByIdAsync(aecDto.UserId);
