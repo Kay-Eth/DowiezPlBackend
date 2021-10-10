@@ -28,5 +28,7 @@ namespace DowiezPlBackend.Models
         public AppUser Reporter { get; set; }
 
         public AppUser Reported { get; set; }
+
+        public AppUser Operator { get; set; }
     }
 }

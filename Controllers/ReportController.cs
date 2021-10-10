@@ -78,8 +78,12 @@ namespace DowiezPlBackend.Controllers
 
             var dto = _mapper.Map<ReportReadDto>(reportFromRepo);
             dto.ReporterDto = _mapper.Map<AccountLimitedReadDto>(reportFromRepo.Reporter);
+            
             if (reportFromRepo.Reported != null)
                 dto.ReportedDto = _mapper.Map<AccountLimitedReadDto>(reportFromRepo.Reported);
+            if (reportFromRepo.Operator != null)
+                dto.OperatorDto = _mapper.Map<AccountLimitedReadDto>(reportFromRepo.Operator);
+
 
             return Ok(dto);
         }
@@ -122,11 +126,43 @@ namespace DowiezPlBackend.Controllers
         }
 
         /// <summary>
+        /// Cancels a report
+        /// </summary>
+        /// <param name="reportId">Report's Id</param>
+        /// <response code="204">Report was canceled successfully</response>
+        /// <response code="400">Cancelation failed</response>
+        /// <response code="403">Only creator can cancel this report</response>
+        /// <response code="404">Report not found</response>
+        [HttpPut("cancel/{reportId}")]
+        [Authorize(Roles = "Standard")]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(typeof(ErrorMessage), StatusCodes.Status400BadRequest)]
+        public async Task<ActionResult> CancelReport(Guid reportId)
+        {
+            var reportFromRepo = await _repository.GetReportAsync(reportId);
+            if (reportFromRepo == null)
+                return NotFound();
+            
+            if (reportFromRepo.Reporter.Id != (await GetMyUserAsync()).Id)
+                return Forbid();
+            
+            if (reportFromRepo.Status != ReportStatus.Issued)
+                return BadRequest(new ErrorMessage($"Cannot cancel report with status {reportFromRepo.Status}.", "RC_CaR_2"));
+            
+            reportFromRepo.Status = ReportStatus.Canceled;
+            if (!await _repository.SaveChangesAsync())
+                return BadRequest(new ErrorMessage("Failed to cancel a report.", "RC_CaR_1"));
+            
+            return NoContent();
+        }
+
+        /// <summary>
         /// Changes the status of a report
         /// </summary>
         /// <param name="reportId">Report's Id</param>
         /// <param name="status">Report's new status</param>
         /// <response code="204">Report was updated successfully</response>
+        /// <response code="400">Status change failed</response>
         /// <response code="404">Report not found</response>
         [HttpPut("status/{reportId}/{status}")]
         [Authorize(Roles = "Moderator,Admin")]
@@ -138,9 +174,46 @@ namespace DowiezPlBackend.Controllers
             if (reportFromRepo == null)
                 return NotFound();
             
+            if (reportFromRepo.Status == ReportStatus.Issued)
+                return BadRequest(new ErrorMessage($"Invalid operation. Tried to change {ReportStatus.Issued} to {status}. The {ReportStatus.Issued} status can only be change using {nameof(AssignReport)} method.", "RC_URS_2"));
+            
+            if (status == ReportStatus.Issued)
+                return BadRequest(new ErrorMessage($"Invalid operation. Tried to change {reportFromRepo.Status} to {ReportStatus.Issued}.", "RC_URS_3"));
+            
+            if (reportFromRepo.Status == ReportStatus.Canceled)
+                return BadRequest(new ErrorMessage($"Invalid operation. Cannot interact with report with status {ReportStatus.Canceled}", "RC_URS_4"));
+            
             reportFromRepo.Status = status;
             if (!await _repository.SaveChangesAsync())
                 return BadRequest(new ErrorMessage("Failed to update a report.", "RC_URS_1"));
+            
+            return NoContent();
+        }
+
+        /// <summary>
+        /// Assigns report to moderator and changes the status of a report to InProgess
+        /// </summary>
+        /// <param name="reportId">Report's Id</param>
+        /// <response code="204">Report was updated successfully</response>
+        /// <response code="400">Assignation failed</response>
+        /// <response code="404">Report not found</response>
+        [HttpPut("assign/{reportId}")]
+        [Authorize(Roles = "Moderator,Admin")]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(typeof(ErrorMessage), StatusCodes.Status400BadRequest)]
+        public async Task<ActionResult> AssignReport(Guid reportId)
+        {
+            var reportFromRepo = await _repository.GetReportAsync(reportId);
+            if (reportFromRepo == null)
+                return NotFound();
+            
+            if (reportFromRepo.Operator != null)
+                return BadRequest(new ErrorMessage("Cannot assign a report that is already assigned to someone.", "RC_AR_1"));
+            
+            reportFromRepo.Operator = await GetMyUserAsync();
+            reportFromRepo.Status = ReportStatus.InProgress;
+            if (!await _repository.SaveChangesAsync())
+                return BadRequest(new ErrorMessage("Failed to update a report.", "RC_AR_2"));
             
             return NoContent();
         }

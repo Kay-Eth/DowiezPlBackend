@@ -20,5 +20,7 @@ namespace DowiezPlBackend.Dtos.Report
         [Required]
         public AccountLimitedReadDto ReporterDto { get; set; }
         public AccountLimitedReadDto ReportedDto { get; set; }
+
+        public AccountLimitedReadDto OperatorDto { get; set; }
     }
 }
