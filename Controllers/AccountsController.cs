@@ -55,6 +55,19 @@ namespace DowiezPlBackend.Controllers
         {
             return (await userManager.FindByIdAsync(userId)) != null;
         }
+
+        /// <summary>
+        /// Returns all accounts. Try not to use that. Use UserIds and retrieve info with /api/Accounts/{userId} method
+        /// </summary>
+        /// <response code="200">Returns object with user data</response>
+        [HttpGet]
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = "Moderator,Admin")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        public ActionResult<IEnumerable<AccountReadDto>> GetAccounts()
+        {
+            var result = _userManager.Users.ToList();
+            return Ok(_mapper.Map<IEnumerable<AccountReadDto>>(result));
+        }
         
         /// <summary>
         /// Returns my account's information
@@ -68,7 +81,7 @@ namespace DowiezPlBackend.Controllers
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(ErrorMessage), StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public async Task<ActionResult<AccountReadDto>> GetAccount()
+        public async Task<ActionResult<AccountReadDto>> GetMyAccount()
         {
             var userDb = await _userManager.FindByNameAsync(HttpContext.User.Identity.Name);
             if (userDb == null)
@@ -86,6 +99,32 @@ namespace DowiezPlBackend.Controllers
                 return BadRequest(new ErrorMessage($"Role {role} doesn't exist!"));
             
             return Ok(accountReadDto);
+        }
+
+        /// <summary>
+        /// Returns account's information
+        /// </summary>
+        /// <response code="200">Returns object with user data</response>
+        /// <response code="400">Cannot retrieve information about moderator accounts</response>
+        /// <response code="403">Only moderators can do it</response>
+        /// <response code="404">Account not found</response>
+        [HttpGet("{userId}")]
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = "Moderator,Admin")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        public async Task<ActionResult<AccountReadDto>> GetUserAccount(Guid userId)
+        {
+            var user = await _userManager.FindByIdAsync(userId.ToString());
+            if (user == null)
+                return NotFound();
+            
+            var roles = await _userManager.GetRolesAsync(user);
+            for (int i = 0; i < roles.Count; i++)
+            {
+                if (roles[i] == "Moderator" || roles[i] == "Admin")
+                    return BadRequest(new ErrorMessage("Cannot retrieve information about moderator accounts", "AC_GUA_1"));
+            }
+            
+            return Ok(_mapper.Map<AccountReadDto>(user));
         }
 
         /// <summary>
