@@ -69,7 +69,7 @@ namespace DowiezPlBackend.Controllers
         [HttpGet("search")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         public async Task<ActionResult<IEnumerable<DemandSimpleReadDto>>> GetSearchDemands(
-            [Required] ICollection<DemandCategory> categories,
+            [Required] string categories,
             Guid? fromCityId,
             [Required] Guid destinationCityId,
             Guid? limitedToGroupId)
@@ -84,9 +84,24 @@ namespace DowiezPlBackend.Controllers
                 }
             }
 
+            var categories_array = categories.Split(",");
+            var categories_list = new List<DemandCategory>();
+
+            for (int i = 0; i < categories_array.Length; i++)
+            {
+                try
+                {
+                    categories_list.Add((DemandCategory)(Int32.Parse(categories_array[i])));
+                }
+                catch (Exception e)
+                {
+                    return BadRequest(new ErrorMessage("Failed to execute search query: " + e.Message, "DC_GSD_1"));
+                }
+            }
+
             var results = await _repository.SearchDemandsAsync(
                 user,
-                categories,
+                categories_list,
                 fromCityId,
                 destinationCityId,
                 limitedToGroupId
