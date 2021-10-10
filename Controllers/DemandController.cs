@@ -64,7 +64,7 @@ namespace DowiezPlBackend.Controllers
         public async Task<ActionResult<IEnumerable<DemandSimpleReadDto>>> GetMyDemands()
         {
             var userDb = await GetMyUserAsync();
-            var results = _repository.GetUserDemandsAsync(userDb.Id);
+            var results = await _repository.GetUserDemandsAsync(userDb.Id);
             return Ok(_mapper.Map<IEnumerable<DemandSimpleReadDto>>(results));
         }
 
