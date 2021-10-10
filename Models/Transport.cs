@@ -29,9 +29,11 @@ namespace DowiezPlBackend.Models
         public ICollection<Demand> Demands { get; set; }
 
         [Required]
+        [ForeignKey("StartsInCityId")]
         public City StartsIn { get; set; }
 
         [Required]
+        [ForeignKey("EndsInCityId")]
         public City EndsIn { get; set; }
 
         [Required]

@@ -3,7 +3,9 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using AutoMapper;
 using DowiezPlBackend.Data;
+using DowiezPlBackend.Dtos;
 using DowiezPlBackend.Dtos.Demand;
+using DowiezPlBackend.Enums;
 using DowiezPlBackend.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
@@ -109,6 +111,60 @@ namespace DowiezPlBackend.Controllers
             }
 
             return Ok(_mapper.Map<DemandReadDto>(demandFromRepo));
+        }
+
+        [HttpPost]
+        [Authorize(Roles = "Standard")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        public async Task<ActionResult<DemandReadDto>> CreateDemand(DemandCreateDto demandCreateDto)
+        {
+            var me = await GetMyUserAsync();
+
+            var demand = _mapper.Map<Demand>(demandCreateDto);
+            demand.CreationDate = DateTime.UtcNow;
+            demand.Status = DemandStatus.Created;
+
+            if (demandCreateDto.FromCityId != null)
+            {
+                var cityFrom = await _repository.GetCityAsync((Guid)(demandCreateDto.FromCityId));
+                if (cityFrom == null)
+                    return NotFound(new ErrorMessage("City From does not exist.", "DC_CD_1"));
+
+                demand.From = cityFrom;
+            }
+
+            var cityDest = await _repository.GetCityAsync(demandCreateDto.DestinationCityId);
+            if (cityDest == null)
+                return NotFound(new ErrorMessage("City Destination does not exist.", "DC_CD_2"));
+            
+            demand.Destination = cityDest;
+
+            if (demandCreateDto.RecieverUserId != null)
+            {
+                var reciever = await GetUserAsync(demandCreateDto.RecieverUserId.ToString());
+                if (reciever == null)
+                    return NotFound(new ErrorMessage("Reciever does not exist.", "DC_CD_3"));
+                
+                demand.Reciever = reciever;
+            }
+
+            if (demandCreateDto.LimitedToGroupId != null)
+            {
+                var group = await _repository.GetGroupAsync((Guid)(demandCreateDto.LimitedToGroupId));
+                if (group == null)
+                    return NotFound(new ErrorMessage("Group does not exist.", "DC_CD_4"));
+                
+                if (!await _repository.IsUserAMemberOfAGroup(me.Id, group.GroupId))
+                    return Forbid();
+
+                demand.LimitedTo = group;
+            }
+
+            _repository.CreateDemand(demand);
+            if (!await _repository.SaveChangesAsync())
+                return BadRequest(new ErrorMessage("Failed to create a demand.", "DC_CD_5"));
+
+            return Ok(_mapper.Map<DemandReadDto>(demand));
         }
     }
 }

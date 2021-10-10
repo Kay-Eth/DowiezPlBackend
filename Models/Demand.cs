@@ -1,5 +1,6 @@
 using System;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 using DowiezPlBackend.Enums;
 
 namespace DowiezPlBackend.Models
@@ -24,6 +25,7 @@ namespace DowiezPlBackend.Models
         public City From { get; set; }
         
         [Required]
+        [ForeignKey("DestinationCityId")]
         public City Destination { get; set; }
 
         [Required]
