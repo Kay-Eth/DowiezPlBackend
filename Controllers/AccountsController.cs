@@ -57,13 +57,13 @@ namespace DowiezPlBackend.Controllers
         }
         
         /// <summary>
-        /// Returns account information
+        /// Returns my account's information
         /// </summary>
         /// <response code="200">Returns object with user data</response>
         /// <response code="401">User not authenticated</response>
         /// <response code="404">User not found</response>
         /// <response code="423">User is banned</response>
-        [HttpGet]
+        [HttpGet("my")]
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Policy = "NotBanned")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(ErrorMessage), StatusCodes.Status400BadRequest)]
