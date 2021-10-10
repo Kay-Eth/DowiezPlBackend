@@ -19,6 +19,7 @@ namespace DowiezPlBackend.Data
         }
 
         public async Task<List<Demand>> SearchDemandsAsync(
+            AppUser excludeUser,
             ICollection<DemandCategory> categories,
             Guid? fromCityId,
             Guid destinationCityId,
@@ -39,6 +40,8 @@ namespace DowiezPlBackend.Data
                     && (fromCityId == null ? true : (d.From == null ? true : d.From.CityId == fromCityId))
                     && destinationCityId == d.Destination.CityId
                     && (limitedToGroupId == null ? true : d.LimitedTo.GroupId == limitedToGroupId)
+                    && d.Creator.Id != excludeUser.Id
+                    && d.Reciever.Id != excludeUser.Id
                 ).ToListAsync();
         }
 

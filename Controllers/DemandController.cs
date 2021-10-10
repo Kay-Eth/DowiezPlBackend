@@ -35,9 +35,10 @@ namespace DowiezPlBackend.Controllers
         [ProducesResponseType(StatusCodes.Status200OK)]
         public async Task<ActionResult<IEnumerable<DemandSimpleReadDto>>> GetSearchDemands(DemandSearchDto demandSearchDto)
         {
+            var user = await GetMyUserAsync();
+
             if (demandSearchDto.LimitedToGroupId != null)
             {
-                var user = await GetMyUserAsync();
                 if (!(await IsModerator(user) || await _repository.IsUserAMemberOfAGroup(user.Id, (Guid)(demandSearchDto.LimitedToGroupId))))
                 {
                     return Forbid();
@@ -45,6 +46,7 @@ namespace DowiezPlBackend.Controllers
             }
 
             var results = await _repository.SearchDemandsAsync(
+                user,
                 demandSearchDto.Categories,
                 demandSearchDto.FromCityId,
                 demandSearchDto.DestinationCityId,

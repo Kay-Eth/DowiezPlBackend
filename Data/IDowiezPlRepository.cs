@@ -18,6 +18,7 @@ namespace DowiezPlBackend.Data
 
         void CreateDemand(Demand demand);
         Task<List<Demand>> SearchDemandsAsync(
+            AppUser excludeUser,
             ICollection<DemandCategory> categories,
             Guid? fromCityId,
             Guid destinationCityId,
