@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.Threading.Tasks;
 using AutoMapper;
 using DowiezPlBackend.Data;
@@ -25,21 +26,59 @@ namespace DowiezPlBackend.Controllers
             _mapper = mapper;
         }
 
+        // /// <summary>
+        // /// Searches demands (with status "Created") based on search data
+        // /// </summary>
+        // /// <param name="demandSearchDto">Search data</param>
+        // /// <response code="200">Returns array of demands</response>
+        // /// <response code="403">Cannot read demands from a group that user is not a member</response>
+        // [HttpGet("search")]
+        // [ProducesResponseType(StatusCodes.Status200OK)]
+        // public async Task<ActionResult<IEnumerable<DemandSimpleReadDto>>> GetSearchDemands(DemandSearchDto demandSearchDto)
+        // {
+        //     var user = await GetMyUserAsync();
+
+        //     if (demandSearchDto.LimitedToGroupId != null)
+        //     {
+        //         if (!(await IsModerator(user) || await _repository.IsUserAMemberOfAGroup(user.Id, (Guid)(demandSearchDto.LimitedToGroupId))))
+        //         {
+        //             return Forbid();
+        //         }
+        //     }
+
+        //     var results = await _repository.SearchDemandsAsync(
+        //         user,
+        //         demandSearchDto.Categories,
+        //         demandSearchDto.FromCityId,
+        //         demandSearchDto.DestinationCityId,
+        //         demandSearchDto.LimitedToGroupId
+        //     );
+
+        //     return Ok(_mapper.Map<IEnumerable<DemandSimpleReadDto>>(results));
+        // }
+
         /// <summary>
-        /// Searches demands (with status "Created") based on search data
+        /// Searches demands (with status "Created") based on search query
         /// </summary>
-        /// <param name="demandSearchDto">Search data</param>
+        /// <param name="categories">Search data</param>
+        /// <param name="fromCityId">Search data</param>
+        /// <param name="destinationCityId">Search data</param>
+        /// <param name="limitedToGroupId">Search data</param>
         /// <response code="200">Returns array of demands</response>
         /// <response code="403">Cannot read demands from a group that user is not a member</response>
         [HttpGet("search")]
         [ProducesResponseType(StatusCodes.Status200OK)]
-        public async Task<ActionResult<IEnumerable<DemandSimpleReadDto>>> GetSearchDemands(DemandSearchDto demandSearchDto)
+        public async Task<ActionResult<IEnumerable<DemandSimpleReadDto>>> GetSearchDemands(
+            [Required] ICollection<DemandCategory> categories,
+            Guid? fromCityId,
+            [Required] Guid destinationCityId,
+            Guid? limitedToGroupId)
         {
             var user = await GetMyUserAsync();
 
-            if (demandSearchDto.LimitedToGroupId != null)
+            if (limitedToGroupId != null)
             {
-                if (!(await IsModerator(user) || await _repository.IsUserAMemberOfAGroup(user.Id, (Guid)(demandSearchDto.LimitedToGroupId))))
+                if (!(await IsModerator(user) || await _repository.IsUserAMemberOfAGroup(user.Id, (Guid)(limitedToGroupId))))
                 {
                     return Forbid();
                 }
@@ -47,10 +86,10 @@ namespace DowiezPlBackend.Controllers
 
             var results = await _repository.SearchDemandsAsync(
                 user,
-                demandSearchDto.Categories,
-                demandSearchDto.FromCityId,
-                demandSearchDto.DestinationCityId,
-                demandSearchDto.LimitedToGroupId
+                categories,
+                fromCityId,
+                destinationCityId,
+                limitedToGroupId
             );
 
             return Ok(_mapper.Map<IEnumerable<DemandSimpleReadDto>>(results));
