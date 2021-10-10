@@ -121,6 +121,7 @@ namespace DowiezPlBackend.Controllers
             var me = await GetMyUserAsync();
 
             var demand = _mapper.Map<Demand>(demandCreateDto);
+            demand.Creator = me;
             demand.CreationDate = DateTime.UtcNow;
             demand.Status = DemandStatus.Created;
 
