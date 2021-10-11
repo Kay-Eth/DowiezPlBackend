@@ -28,6 +28,18 @@ namespace DowiezPlBackend.Data
             if (categories == null)
                 throw new ArgumentNullException(nameof(categories));
             
+            var cities = await GetCitiesAsync();
+
+            IEnumerable<Guid> fromCities = null;
+
+            if (fromCityId != null)
+            {
+                var fromCity = await GetCityNotTrackedAsync((Guid)fromCityId);
+                fromCities = (await GetCityDistrictsAsync(fromCity)).Select(c => c.CityId);
+            }
+
+            IEnumerable<Guid> destinationCities = (await GetCityDistrictsAsync(await GetCityNotTrackedAsync(destinationCityId))).Select(c => c.CityId);
+            
             return await _context.Demands.AsNoTracking()
                 .Include(c => c.From)
                 .Include(c => c.Destination)
@@ -37,8 +49,8 @@ namespace DowiezPlBackend.Data
                 .Include(g => g.LimitedTo)
                 .Where(d => d.Status == DemandStatus.Created
                     && categories.Contains(d.Category)
-                    && (fromCityId == null ? true : (d.From == null ? true : d.From.CityId == fromCityId))
-                    && destinationCityId == d.Destination.CityId
+                    && (fromCityId == null ? true : (d.From == null ? true : fromCities.Contains(d.From.CityId)))
+                    && destinationCities.Contains(destinationCityId)
                     && (limitedToGroupId == null ? true : d.LimitedTo.GroupId == limitedToGroupId)
                     && d.Creator.Id != excludeUser.Id
                     && d.Reciever.Id != excludeUser.Id

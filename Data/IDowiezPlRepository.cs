@@ -14,6 +14,7 @@ namespace DowiezPlBackend.Data
         Task<List<City>> GetCitiesAsync();
         Task<City> GetCityAsync(Guid cityId);
         Task<City> GetCityNotTrackedAsync(Guid cityId);
+        Task<List<City>> GetCityDistrictsAsync(City city);
         void DeleteCity(City city);
 
         void CreateDemand(Demand demand);

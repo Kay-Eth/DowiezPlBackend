@@ -35,8 +35,9 @@ namespace DowiezPlBackend.Controllers
         /// <param name="destinationCityId">Destination city's id</param>
         /// <param name="limitedToGroupId">Group's id</param>
         /// <response code="200">Returns array of demands</response>
-        /// <response code="400">Returns array of demands</response>
+        /// <response code="400">Search failed</response>
         /// <response code="403">Cannot read demands from a group that user is not a member</response>
+        /// <response code="404">City not found</response>
         [HttpGet("search")]
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
         [ProducesResponseType(StatusCodes.Status200OK)]
@@ -70,6 +71,17 @@ namespace DowiezPlBackend.Controllers
                     return BadRequest(new ErrorMessage("Failed to execute search query: " + e.Message, "DC_GSD_1"));
                 }
             }
+
+            if (fromCityId != null)
+            {
+                var fromCity = await _repository.GetCityNotTrackedAsync((Guid)fromCityId);
+                if (fromCity == null)
+                    return NotFound(new ErrorMessage("From city not found.", "DC_GSD_2"));
+            }
+
+            var destCity = await _repository.GetCityNotTrackedAsync(destinationCityId);
+            if (destCity == null)
+                return NotFound(new ErrorMessage("Destination city not found.", "DC_GSD_3"));
 
             var results = await _repository.SearchDemandsAsync(
                 user,
