@@ -27,8 +27,6 @@ namespace DowiezPlBackend.Data
         {
             if (categories == null)
                 throw new ArgumentNullException(nameof(categories));
-            
-            var cities = await GetCitiesAsync();
 
             IEnumerable<Guid> fromCities = null;
 
@@ -50,7 +48,7 @@ namespace DowiezPlBackend.Data
                 .Where(d => d.Status == DemandStatus.Created
                     && categories.Contains(d.Category)
                     && (fromCityId == null ? true : (d.From == null ? true : fromCities.Contains(d.From.CityId)))
-                    && destinationCities.Contains(destinationCityId)
+                    && destinationCities.Contains(d.Destination.CityId)
                     && (limitedToGroupId == null ? true : d.LimitedTo.GroupId == limitedToGroupId)
                     && d.Creator.Id != excludeUser.Id
                     && d.Reciever.Id != excludeUser.Id

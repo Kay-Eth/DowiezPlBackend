@@ -21,11 +21,20 @@ namespace DowiezPlBackend.Data
         public async Task<List<Transport>> SearchTransportsAsync(
             ICollection<TransportCategory> categories,
             Guid? startsInCityId,
-            Guid endsInCityId
-        )
+            Guid endsInCityId)
         {
             if (categories == null)
                 throw new ArgumentNullException(nameof(categories));
+            
+            IEnumerable<Guid> startCities = null;
+
+            if (startsInCityId != null)
+            {
+                var startCity = await GetCityNotTrackedAsync((Guid)startsInCityId);
+                startCities = (await GetCityDistrictsAsync(startCity)).Select(c => c.CityId);
+            }
+
+            IEnumerable<Guid> endCities = (await GetCityDistrictsAsync(await GetCityNotTrackedAsync(endsInCityId))).Select(c => c.CityId);            
             
             return await _context.Transports.AsNoTracking()
                 .Include(c => c.StartsIn)
@@ -33,8 +42,8 @@ namespace DowiezPlBackend.Data
                 .Include(u => u.Creator)
                 .Where(t => t.Status == TransportStatus.Declared
                     && categories.Contains(t.Category)
-                    && (startsInCityId == null ? true : startsInCityId == t.StartsIn.CityId)
-                    && endsInCityId == t.EndsIn.CityId
+                    && (startsInCityId == null ? true : startCities.Contains(t.StartsIn.CityId))
+                    && endCities.Contains(t.EndsIn.CityId)
                 ).ToListAsync();
         }
 
