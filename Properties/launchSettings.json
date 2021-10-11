@@ -42,7 +42,7 @@
       "dotnetRunMessages": "true",
       "launchBrowser": true,
       "launchUrl": "swagger",
-      "applicationUrl": "https://dowiez.pl:5001;http://dowiez.pl:5000",
+      "applicationUrl": "https://dowiez.pl:443;http://dowiez.pl:80",
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "VPS"
       }
