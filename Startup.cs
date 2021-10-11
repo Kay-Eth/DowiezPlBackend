@@ -31,9 +31,12 @@ namespace DowiezPlBackend
 {
     public class Startup
     {
-        public Startup(IConfiguration configuration)
+        string currentEnv;
+
+        public Startup(IConfiguration configuration, IWebHostEnvironment env)
         {
             Configuration = configuration;
+            currentEnv = env.EnvironmentName;
         }
 
         public IConfiguration Configuration { get; }
@@ -89,7 +92,8 @@ namespace DowiezPlBackend
                     };
                 });
             
-            
+            if (currentEnv == "VPS")
+                services.AddLettuceEncrypt();
 
             services.AddControllers()
                 // .ConfigureApiBehaviorOptions(options => 
