@@ -91,9 +91,6 @@ namespace DowiezPlBackend
                         ClockSkew = TimeSpan.Zero
                     };
                 });
-            
-            if (currentEnv == "VPS")
-                services.AddLettuceEncrypt();
 
             services.AddControllers()
                 // .ConfigureApiBehaviorOptions(options => 
