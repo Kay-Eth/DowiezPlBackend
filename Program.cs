@@ -1,11 +1,13 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 using System.Security.Claims;
 using System.Threading.Tasks;
 using DowiezPlBackend.Models;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Server.Kestrel.Core;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -62,6 +64,17 @@ namespace DowiezPlBackend
             Host.CreateDefaultBuilder(args)
                 .ConfigureWebHostDefaults(webBuilder =>
                 {
+                    webBuilder.ConfigureKestrel(options => {
+                        var port = 5001;
+                        var pfxFilePath = "/home/kayeth/DowiezPlBackendUpdate/certificate.pfx";
+                        var pfxPassword = "DowiezPl1234@"; 
+
+                        options.Listen(IPAddress.Any, port, listenOptions => {
+                            listenOptions.Protocols = HttpProtocols.Http1AndHttp2;
+                            listenOptions.UseHttps(pfxFilePath, pfxPassword);
+                        });
+                    });
+
                     webBuilder.UseStartup<Startup>();
                 });
     }
