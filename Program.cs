@@ -60,22 +60,37 @@ namespace DowiezPlBackend
             host.Run();
         }
 
-        public static IHostBuilder CreateHostBuilder(string[] args) =>
-            Host.CreateDefaultBuilder(args)
-                .ConfigureWebHostDefaults(webBuilder =>
-                {
-                    webBuilder.ConfigureKestrel(options => {
-                        var port = 5001;
-                        var pfxFilePath = "/home/kayeth/DowiezPlBackendUpdate/certificate.pfx";
-                        var pfxPassword = "DowiezPl1234@"; 
+        public static IHostBuilder CreateHostBuilder(string[] args)
+        {
+            var environment = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT");
 
-                        options.Listen(IPAddress.Any, port, listenOptions => {
-                            listenOptions.Protocols = HttpProtocols.Http1AndHttp2;
-                            listenOptions.UseHttps(pfxFilePath, pfxPassword);
+            if (environment == "VPS")
+            {
+                return Host.CreateDefaultBuilder(args)
+                    .ConfigureWebHostDefaults(webBuilder =>
+                    {
+                        webBuilder.ConfigureKestrel(options => {
+                            var port = 5001;
+                            var pfxFilePath = "/home/kayeth/DowiezPlBackendUpdate/certificate.pfx";
+                            var pfxPassword = "DowiezPl1234@"; 
+
+                            options.Listen(IPAddress.Any, port, listenOptions => {
+                                listenOptions.Protocols = HttpProtocols.Http1AndHttp2;
+                                listenOptions.UseHttps(pfxFilePath, pfxPassword);
+                            });
                         });
-                    });
 
-                    webBuilder.UseStartup<Startup>();
-                });
+                        webBuilder.UseStartup<Startup>();
+                    });
+            }
+            else
+            {
+                return Host.CreateDefaultBuilder(args)
+                    .ConfigureWebHostDefaults(webBuilder =>
+                    {
+                        webBuilder.UseStartup<Startup>();
+                    });
+            }
+        }
     }
 }

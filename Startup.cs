@@ -26,6 +26,7 @@ using System.Net;
 using DowiezPlBackend.Services;
 using DowiezPlBackend.Policies;
 using Microsoft.AspNetCore.Authorization;
+using DowiezPlBackend.Hubs;
 
 namespace DowiezPlBackend
 {
@@ -167,6 +168,8 @@ namespace DowiezPlBackend
             });
 
             services.AddSwaggerGenNewtonsoftSupport();
+
+            services.AddSignalR();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -198,6 +201,7 @@ namespace DowiezPlBackend
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllers();
+                endpoints.MapHub<ChatHub>("ChatHub");
             });
         }
     }
