@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
 using System.Security.Claims;
@@ -149,10 +150,6 @@ namespace DowiezPlBackend.Controllers
             if (result.Succeeded)
             {
                 await _userManager.AddToRoleAsync(user, "Standard");
-                // return Ok(await BuildToken(new AccountLoginDto() {
-                //     Email = accountCreateDto.Email,
-                //     Password = accountCreateDto.Password
-                // }));
                 var email_confirmation_token = await _userManager.GenerateEmailConfirmationTokenAsync(user);
 
                 await _mailService.SendEmailConfirmationAsync(accountCreateDto.Email, user.Id.ToString(), email_confirmation_token);
@@ -161,12 +158,6 @@ namespace DowiezPlBackend.Controllers
             }
             else
             {
-                // string details = "";
-                // foreach (var error in result.Errors)
-                // {
-                //     details += $"{error.Code}|";
-                // }
-                // details = details.Remove(details.Length - 1);
                 return BadRequest(new ErrorMessage("Failed to create account.", result.Errors));
             }
         }
@@ -293,6 +284,108 @@ namespace DowiezPlBackend.Controllers
                 return NoContent();
             else
                 return BadRequest(new ErrorMessage("Failed to confirm email."));
+        }
+
+        /// <summary>
+        /// Generates and sends a password reset token to given email address (if exists in database)
+        /// </summary>
+        /// <param name="email">Email address</param>
+        /// <response code="204">Request ended</response>
+        [HttpPost("requestResetPassword")]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        public async Task<ActionResult> SendResetPasswordToken([Required] [EmailAddress] string email)
+        {
+            var user = await _userManager.FindByEmailAsync(email);
+            if (user != null)
+            {
+                var password_reset_token = await _userManager.GeneratePasswordResetTokenAsync(user);
+
+                await _mailService.SendPasswordResetAsync(email, user.Id.ToString(), password_reset_token);
+            }
+
+            return NoContent();
+        }
+
+        /// <summary>
+        /// Performs an password update
+        /// </summary>
+        /// <param name="arpDto">Password reset data object</param>
+        /// <response code="204">Password successfully changed</response>
+        /// <response code="400">An error occured</response>
+        [HttpPut("resetPassword")]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(typeof(ErrorMessage), StatusCodes.Status400BadRequest)]
+        public async Task<ActionResult> ResetPassword(AccountResetPasswordDto arpDto)
+        {
+            var user = await _userManager.FindByIdAsync(arpDto.UserId.ToString());
+            if (user == null)
+                return BadRequest(new ErrorMessage("Password reset failed.", "AC_RP_1"));
+            
+            var result = await _userManager.ResetPasswordAsync(user, arpDto.Token, arpDto.Password);
+            if (result.Succeeded)
+            {
+                return NoContent();
+            }
+            else
+            {
+                return BadRequest(new ErrorMessage("Password reset failed.", result.Errors));
+            }
+        }
+
+        /// <summary>
+        /// Updates password
+        /// </summary>
+        /// <param name="aupDto">Change password data</param>
+        /// <response code="204">Password successfully changed</response>
+        /// <response code="400">Password change failed</response>
+        [HttpPut("changePassword")]
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Policy = "NotBanned")]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(typeof(ErrorMessage), StatusCodes.Status400BadRequest)]
+        public async Task<ActionResult> UpdatePassword(AccountUpdatePasswordDto aupDto)
+        {
+            var userDb = await _userManager.FindByNameAsync(HttpContext.User.Identity.Name);
+            if (userDb == null)
+                return NotFound();
+            
+            var result = await _userManager.ChangePasswordAsync(userDb, aupDto.OldPassword, aupDto.NewPassword);
+            if (result.Succeeded)
+            {
+                return NoContent();
+            }
+            else
+            {
+                return BadRequest(new ErrorMessage("Failed to update password.", result.Errors));
+            }
+        }
+        
+        /// <summary>
+        /// Updates account information
+        /// </summary>
+        /// <param name="audDto">Account's new informations</param>
+        /// <returns></returns>
+        [HttpPut]
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Policy = "NotBanned")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ErrorMessage), StatusCodes.Status400BadRequest)]
+        public async Task<ActionResult<AccountReadDto>> UpdateAccount(AccountUpdateDataDto audDto)
+        {
+            var userDb = await _userManager.FindByNameAsync(HttpContext.User.Identity.Name);
+            if (userDb == null)
+                return NotFound();
+            
+            userDb.FirstName = audDto.FirstName;
+            userDb.LastName = audDto.LastName;
+            
+            var result = await _userManager.UpdateAsync(userDb);
+            if (result.Succeeded)
+            {
+                return Ok(_mapper.Map<AccountReadDto>(userDb));
+            }
+            else
+            {
+                return BadRequest(new ErrorMessage("Failed to update account.", result.Errors));
+            }
         }
 
         private async Task<AccountTokenDto> BuildToken(AppUser appUser)

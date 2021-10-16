@@ -57,7 +57,7 @@ namespace DowiezPlBackend
                     .EnableDetailedErrors()
             );
 
-            services.AddTransient<IMailService, TestMailSendingService>();
+            services.AddTransient<IMailService, CbaPlMailSendingService>();
 
             services.AddIdentity<AppUser, AppRole>(opt =>
             {
