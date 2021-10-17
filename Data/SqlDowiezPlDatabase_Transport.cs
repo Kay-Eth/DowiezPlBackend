@@ -63,6 +63,7 @@ namespace DowiezPlBackend.Data
                 .Include(c => c.StartsIn)
                 .Include(c => c.EndsIn)
                 .Include(u => u.Creator)
+                .Include(d => d.Demands)
                 .FirstOrDefaultAsync(t => t.TransportId == transportId);
         }
 

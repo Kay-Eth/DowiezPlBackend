@@ -41,6 +41,8 @@ namespace DowiezPlBackend.Controllers
         [HttpGet("search")]
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
         [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ErrorMessage), StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(typeof(ErrorMessage), StatusCodes.Status404NotFound)]
         public async Task<ActionResult<IEnumerable<DemandSimpleReadDto>>> GetSearchDemands(
             [Required] string categories,
             Guid? fromCityId,
@@ -122,7 +124,7 @@ namespace DowiezPlBackend.Controllers
             var user = await GetUserAsync(userId.ToString());
             if (user == null)
                 return NotFound();
-            var results = _repository.GetUserDemandsAsync(userId);
+            var results = await _repository.GetUserDemandsAsync(userId);
             return Ok(_mapper.Map<IEnumerable<DemandSimpleReadDto>>(results));
         }
 
@@ -133,7 +135,7 @@ namespace DowiezPlBackend.Controllers
         /// <response code="200">Returns data of demands</response>
         /// <response code="403">Demand is limited to a group, that you don't have access to</response>
         /// <response code="404">Demand not found</response>
-        [HttpGet("{demandId}")]
+        [HttpGet("{demandId}", Name = "GetDemand")]
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
         [ProducesResponseType(StatusCodes.Status200OK)]
         public async Task<ActionResult<DemandReadDto>> GetDemand(Guid demandId)
@@ -154,9 +156,18 @@ namespace DowiezPlBackend.Controllers
             return Ok(_mapper.Map<DemandReadDto>(demandFromRepo));
         }
 
+        /// <summary>
+        /// Creates a demand
+        /// </summary>
+        /// <param name="demandCreateDto">Demand's data</param>
+        /// <response code="201">Returns data of a created demand</response>
+        /// <response code="400">Failed to create a demand</response>
+        /// <response code="404">City, user or group not found</response>
         [HttpPost]
         [Authorize(Roles = "Standard")]
-        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status201Created)]
+        [ProducesResponseType(typeof(ErrorMessage), StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(typeof(ErrorMessage), StatusCodes.Status404NotFound)]
         public async Task<ActionResult<DemandReadDto>> CreateDemand(DemandCreateDto demandCreateDto)
         {
             var me = await GetMyUserAsync();
@@ -168,14 +179,14 @@ namespace DowiezPlBackend.Controllers
 
             if (demandCreateDto.FromCityId != null)
             {
-                var cityFrom = await _repository.GetCityAsync((Guid)(demandCreateDto.FromCityId));
+                var cityFrom = await _repository.GetCityNotTrackedAsync((Guid)(demandCreateDto.FromCityId));
                 if (cityFrom == null)
                     return NotFound(new ErrorMessage("City From does not exist.", "DC_CD_1"));
 
                 demand.From = cityFrom;
             }
 
-            var cityDest = await _repository.GetCityAsync(demandCreateDto.DestinationCityId);
+            var cityDest = await _repository.GetCityNotTrackedAsync(demandCreateDto.DestinationCityId);
             if (cityDest == null)
                 return NotFound(new ErrorMessage("City Destination does not exist.", "DC_CD_2"));
             
@@ -192,7 +203,7 @@ namespace DowiezPlBackend.Controllers
 
             if (demandCreateDto.LimitedToGroupId != null)
             {
-                var group = await _repository.GetGroupAsync((Guid)(demandCreateDto.LimitedToGroupId));
+                var group = await _repository.GetGroupNotTrackedAsync((Guid)(demandCreateDto.LimitedToGroupId));
                 if (group == null)
                     return NotFound(new ErrorMessage("Group does not exist.", "DC_CD_4"));
                 
@@ -206,7 +217,119 @@ namespace DowiezPlBackend.Controllers
             if (!await _repository.SaveChangesAsync())
                 return BadRequest(new ErrorMessage("Failed to create a demand.", "DC_CD_5"));
 
-            return Ok(_mapper.Map<DemandReadDto>(demand));
+            var demandReadDto = _mapper.Map<DemandReadDto>(demand);
+            return CreatedAtRoute(nameof(GetDemand), new { demandId = demandReadDto.DemandId }, demandReadDto);
+        }
+
+        /// <summary>
+        /// Updates a demand. Only demand with status Created can be updated.
+        /// </summary>
+        /// <param name="demandUpdateDto">Demand's new data</param>
+        /// <response code="200">Returns data of a updated demand</response>
+        /// <response code="400">Failed to update a demand</response>
+        /// <response code="404">City, user or group not found</response>
+        [HttpPut]
+        [Authorize(Roles = "Standard")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ErrorMessage), StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(typeof(ErrorMessage), StatusCodes.Status404NotFound)]
+        public async Task<ActionResult<DemandReadDto>> UpdateDemand(DemandUpdateDto demandUpdateDto)
+        {
+            var me = await GetMyUserAsync();
+            var demandFromRepo = await _repository.GetDemandAsync(demandUpdateDto.DemandId);
+
+            if (demandFromRepo == null)
+                return NotFound(new ErrorMessage("Demand does not exist.", "DC_UD_1"));
+            
+            if (demandFromRepo.Creator.Id != me.Id)
+                return Forbid();
+            
+            if (demandFromRepo.Status != DemandStatus.Created)
+                return BadRequest(new ErrorMessage("Cannot update a demand with status other than Created.", "DC_UD_2"));
+            
+            if (demandUpdateDto.FromCityId != null)
+            {
+                var cityFrom = await _repository.GetCityNotTrackedAsync((Guid)(demandUpdateDto.FromCityId));
+                if (cityFrom == null)
+                    return NotFound(new ErrorMessage("City From does not exist.", "DC_UD_3"));
+
+                demandFromRepo.From = cityFrom;
+            }
+
+            var cityDest = await _repository.GetCityNotTrackedAsync(demandUpdateDto.DestinationCityId);
+            if (cityDest == null)
+                return NotFound(new ErrorMessage("City Destination does not exist.", "DC_UD_4"));
+            
+            demandFromRepo.Destination = cityDest;
+
+            if (demandUpdateDto.RecieverUserId != null)
+            {
+                var reciever = await GetUserAsync(demandUpdateDto.RecieverUserId.ToString());
+                if (reciever == null)
+                    return NotFound(new ErrorMessage("Reciever does not exist.", "DC_UD_5"));
+                
+                demandFromRepo.Reciever = reciever;
+            }
+
+            if (demandUpdateDto.LimitedToGroupId != null)
+            {
+                var group = await _repository.GetGroupNotTrackedAsync((Guid)(demandUpdateDto.LimitedToGroupId));
+                if (group == null)
+                    return NotFound(new ErrorMessage("Group does not exist.", "DC_UD_6"));
+                
+                if (!await _repository.IsUserAMemberOfAGroup(me.Id, group.GroupId))
+                    return Forbid();
+
+                demandFromRepo.LimitedTo = group;
+            }
+            
+            _mapper.Map(demandUpdateDto, demandFromRepo);
+        
+            if (!await _repository.SaveChangesAsync())
+                return BadRequest(new ErrorMessage("Failed to update a demand.", "DC_UD_7"));
+
+            return Ok(_mapper.Map<DemandReadDto>(demandFromRepo));
+        }
+
+        /// <summary>
+        /// Cancels a demand
+        /// </summary>
+        /// <param name="demandId">Demand's Id</param>
+        /// <response code="204">Demand successfully canceled</response>
+        /// <response code="400">Failed to cancel demand</response>
+        /// <response code="404">Demand not found</response>
+        [HttpPut("{demandId}/cancel")]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(typeof(ErrorMessage), StatusCodes.Status400BadRequest)]
+        public async Task<ActionResult> CancelDemand(Guid demandId)
+        {
+            var me = await GetMyUserAsync();
+            var demandFromRepo = await _repository.GetDemandAsync(demandId);
+
+            if (demandFromRepo == null)
+                return NotFound();
+            
+            if (demandFromRepo.Creator.Id != me.Id)
+                return Forbid();
+            
+            if (demandFromRepo.Status == DemandStatus.InProgress
+                || demandFromRepo.Status == DemandStatus.Finished)
+            {
+                return BadRequest(new ErrorMessage("Cannot cancel a demand with status InProgress or Finished.", "DC_CaD_1"));
+            }
+
+            if (demandFromRepo.Status == DemandStatus.Canceled)
+            {
+                return BadRequest(new ErrorMessage("Demand is already canceled.", "DC_CaD_2"));
+            }
+
+            demandFromRepo.Status = DemandStatus.Canceled;
+            demandFromRepo.Transport = null;
+
+            if (!await _repository.SaveChangesAsync())
+                return BadRequest(new ErrorMessage("Failed to cancel a demand.", "DC_CaD_3"));
+            
+            return NoContent();
         }
     }
 }

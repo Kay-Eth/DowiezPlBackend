@@ -26,22 +26,6 @@ namespace DowiezPlBackend.Controllers
             _mapper = mapper;
         }
 
-        // /// <summary>
-        // /// Searches transports (with status "Declared") based on search data
-        // /// </summary>
-        // /// <param name="transportSearchDto">Search data</param>
-        // /// <response code="200">Returns array of transports</response>
-        // [HttpGet("search")]
-        // public async Task<ActionResult<IEnumerable<TransportSimpleReadDto>>> GetSearchTransports(TransportSearchDto transportSearchDto)
-        // {
-        //     var results = await _repository.SearchTransportsAsync(
-        //         transportSearchDto.Categories,
-        //         transportSearchDto.StartsInCityId,
-        //         transportSearchDto.EndsInCityId
-        //     );
-        //     return Ok(_mapper.Map<IEnumerable<TransportSimpleReadDto>>(results));
-        // }
-
         /// <summary>
         /// Searches transports (with status "Declared") based on search query
         /// </summary>
@@ -102,7 +86,8 @@ namespace DowiezPlBackend.Controllers
         public async Task<ActionResult<IEnumerable<TransportSimpleReadDto>>> GetMyTransports()
         {
             var userDb = await GetMyUserAsync();
-            var results = _repository.GetUserTransportsAsync(userDb.Id);
+            var results = await _repository.GetUserTransportsAsync(userDb.Id);
+            Console.WriteLine(results);
             return Ok(_mapper.Map<IEnumerable<TransportSimpleReadDto>>(results));
         }
 
@@ -130,7 +115,7 @@ namespace DowiezPlBackend.Controllers
         /// <param name="transportId"></param>
         /// <response code="200">Returns data of transport</response>
         /// <response code="404">Transport not found</response>
-        [HttpGet("{transportId}")]
+        [HttpGet("{transportId}", Name = "GetTransport")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         public async Task<ActionResult<TransportReadDto>> GetTransport(Guid transportId)
         {
@@ -139,6 +124,133 @@ namespace DowiezPlBackend.Controllers
                 return NotFound();
 
             return Ok(_mapper.Map<TransportReadDto>(transportFromRepo));
+        }
+        
+        /// <summary>
+        /// Creates a transport
+        /// </summary>
+        /// <param name="transportCreateDto">Transport's data</param>
+        /// <response code="201">Returns data of a created transport</response>
+        /// <response code="404">City not found</response>
+        [HttpPost]
+        [Authorize(Roles = "Standard")]
+        [ProducesResponseType(StatusCodes.Status201Created)]
+        [ProducesResponseType(typeof(ErrorMessage), StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(typeof(ErrorMessage), StatusCodes.Status404NotFound)]
+        public async Task<ActionResult<TransportReadDto>> CreateTransport(TransportCreateDto transportCreateDto)
+        {
+            var me = await GetMyUserAsync();
+
+            var transport = _mapper.Map<Transport>(transportCreateDto);
+            transport.Creator = me;
+            transport.CreationDate = DateTime.UtcNow;
+            transport.Status = TransportStatus.Declared;
+
+            var cityStart = await _repository.GetCityAsync(transportCreateDto.StartsInCityId);
+            if (cityStart == null)
+                return NotFound(new ErrorMessage("City Start does not exists.", "TC_CT_1"));
+            
+            var cityEnd = await _repository.GetCityAsync(transportCreateDto.EndsInCityId);
+            if (cityEnd == null)
+                return NotFound(new ErrorMessage("City End does not exists.", "TC_CT_2"));
+
+            transport.StartsIn = cityStart;
+            transport.EndsIn = cityEnd;
+
+            _repository.CreateTransport(transport);
+
+            if (!await _repository.SaveChangesAsync())
+                return BadRequest(new ErrorMessage("Failed to create a transport.", "TC_CT_3"));
+
+            var transportReadDto = _mapper.Map<TransportReadDto>(transport);
+            return CreatedAtRoute(nameof(GetTransport), new { transportId = transportReadDto.TransportId }, transportReadDto);
+        }
+
+        /// <summary>
+        /// Updates a transport. Only transport with status Declared can be updated.
+        /// </summary>
+        /// <param name="transportUpdateDto">Transport's new data</param>
+        /// <response code="200">Returns data of a updated transport</response>
+        /// <response code="400">Failed to update a transport</response>
+        /// <response code="404">City not found</response>
+        [HttpPut]
+        [Authorize(Roles = "Standard")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ErrorMessage), StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(typeof(ErrorMessage), StatusCodes.Status404NotFound)]
+        public async Task<ActionResult<TransportReadDto>> UpdateTransport(TransportUpdateDto transportUpdateDto)
+        {
+            var me = await GetMyUserAsync();
+            var transportFromRepo = await _repository.GetTransportAsync(transportUpdateDto.TransportId);
+
+            if (transportFromRepo == null)
+                return NotFound(new ErrorMessage("Transport does not exist.", "TC_UT_1"));
+            
+            if (transportFromRepo.Creator.Id != me.Id)
+                return Forbid();
+            
+            if (transportFromRepo.Status != TransportStatus.Declared)
+                return BadRequest(new ErrorMessage("Cannot update a transport with status other than Declared.", "TC_UT_2"));
+            
+            var cityStart = await _repository.GetCityAsync(transportUpdateDto.StartsInCityId);
+            if (cityStart == null)
+                return NotFound(new ErrorMessage("City Start does not exists.", "TC_UT_3"));
+            
+            var cityEnd = await _repository.GetCityAsync(transportUpdateDto.EndsInCityId);
+            if (cityEnd == null)
+                return NotFound(new ErrorMessage("City End does not exists.", "TC_UT_4"));
+
+            transportFromRepo.StartsIn = cityStart;
+            transportFromRepo.EndsIn = cityEnd;
+
+            _mapper.Map(transportUpdateDto, transportFromRepo);
+
+            if (!await _repository.SaveChangesAsync())
+                return BadRequest(new ErrorMessage("Failed to update a transport.", "TC_UT_5"));
+
+            return Ok(_mapper.Map<TransportReadDto>(transportFromRepo));
+        }
+
+        /// <summary>
+        /// Cancels a transport
+        /// </summary>
+        /// <param name="transportId">Transport's Id</param>
+        /// <response code="204">Transport successfully canceled</response>
+        /// <response code="400">Failed to cancel transport</response>
+        /// <response code="404">Transport not found</response>
+        [HttpPut("{transportId}/cancel")]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(typeof(ErrorMessage), StatusCodes.Status400BadRequest)]
+        public async Task<ActionResult> CancelTransport(Guid transportId)
+        {
+            var me = await GetMyUserAsync();
+            var transportFromRepo = await _repository.GetTransportAsync(transportId);
+
+            if (transportFromRepo == null)
+                return NotFound();
+            
+            if (transportFromRepo.Creator.Id != me.Id)
+                return Forbid();
+            
+            if (transportFromRepo.Status == TransportStatus.Canceled)
+                return BadRequest(new ErrorMessage("Transport is already canceled", "TC_CaT_1"));
+            
+            if (transportFromRepo.Status != TransportStatus.Declared)
+                return BadRequest(new ErrorMessage("Cannot cancel a transport with status other than Declared.", "TC_CaT_2"));
+            
+            transportFromRepo.Status = TransportStatus.Canceled;
+
+            var demands = transportFromRepo.Demands;
+            foreach (var demand in demands)
+            {
+                demand.Transport = null;
+                demand.Status = DemandStatus.Created;
+            }
+
+            if (!await _repository.SaveChangesAsync())
+                return BadRequest(new ErrorMessage("Failed to cancel a transport.", "TC_CaT_3"));
+            
+            return NoContent();
         }
     }
 }

@@ -1,4 +1,5 @@
 using System;
+using System.ComponentModel.DataAnnotations;
 
 namespace DowiezPlBackend.Dtos
 {
@@ -10,8 +11,10 @@ namespace DowiezPlBackend.Dtos
             Details = details;
         }
 
+        [Required]
         public string Title { get; set; }
         public object Details { get; set; }
+        [Required]
         public DateTime Timestamp { get; private set; } = DateTime.UtcNow;
     }
 }
