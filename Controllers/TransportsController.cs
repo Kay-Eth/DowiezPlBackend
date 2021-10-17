@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using AutoMapper;
 using DowiezPlBackend.Data;
 using DowiezPlBackend.Dtos;
+using DowiezPlBackend.Dtos.Demand;
 using DowiezPlBackend.Dtos.Transport;
 using DowiezPlBackend.Enums;
 using DowiezPlBackend.Models;
@@ -251,6 +252,26 @@ namespace DowiezPlBackend.Controllers
                 return BadRequest(new ErrorMessage("Failed to cancel a transport.", "TC_CaT_3"));
             
             return NoContent();
+        }
+
+        /// <summary>
+        /// Returns data of a demands connected to the transport
+        /// </summary>
+        /// <param name="transportId"></param>
+        /// <response code="200">Returns data of demands</response>
+        /// <response code="404">Transport not found</response>
+        [HttpGet("{transportId}/demands")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        public async Task<ActionResult<DemandSimpleReadDto>> GetTransportDemands(Guid transportId)
+        {
+            var me = await GetMyUserAsync();
+            var transportFromRepo = await _repository.GetTransportNotTrackedAsync(transportId);
+
+            if (transportFromRepo == null)
+                return NotFound();
+            
+            var result = transportFromRepo.Demands;
+            return Ok(_mapper.Map<IEnumerable<DemandSimpleReadDto>>(result));
         }
     }
 }

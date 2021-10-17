@@ -88,6 +88,11 @@ namespace DowiezPlBackend.Data
                 .Include(u => u.Creator)
                 .Include(u => u.Reciever)
                 .Include(t => t.Transport)
+                .ThenInclude(t => t.StartsIn)
+                .Include(t => t.Transport)
+                .ThenInclude(t => t.EndsIn)
+                .Include(t => t.Transport)
+                .ThenInclude(t => t.Creator)
                 .Include(g => g.LimitedTo)
                 .FirstOrDefaultAsync(d => d.DemandId == demandId);
         }

@@ -69,11 +69,15 @@ namespace DowiezPlBackend.Data
 
         public async Task<Transport> GetTransportNotTrackedAsync(Guid transportId)
         {
-            return await _context.Transports
+            return await _context.Transports.AsNoTracking()
                 .Include(c => c.StartsIn)
                 .Include(c => c.EndsIn)
                 .Include(u => u.Creator)
-                .AsNoTracking().FirstOrDefaultAsync(t => t.TransportId == transportId);
+                .Include(d => d.Demands)
+                .ThenInclude(c => c.From)
+                .Include(d => d.Demands)
+                .ThenInclude(c => c.Destination)
+                .FirstOrDefaultAsync(t => t.TransportId == transportId);
         }
 
         public void DeleteTransport(Transport transport)
