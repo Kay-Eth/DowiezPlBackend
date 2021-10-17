@@ -16,12 +16,12 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace DowiezPlBackend.Controllers
 {
-    public class DemandController : DowiezPlControllerBase
+    public class DemandsController : DowiezPlControllerBase
     {
         IDowiezPlRepository _repository;
         IMapper _mapper;
         
-        public DemandController(IDowiezPlRepository repository, IMapper mapper, UserManager<AppUser> userManager) : base(userManager)
+        public DemandsController(IDowiezPlRepository repository, IMapper mapper, UserManager<AppUser> userManager) : base(userManager)
         {
             _repository = repository;
             _mapper = mapper;

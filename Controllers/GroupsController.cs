@@ -13,12 +13,12 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace DowiezPlBackend.Controllers
 {
-    public class GroupController : DowiezPlControllerBase
+    public class GroupsController : DowiezPlControllerBase
     {
         IDowiezPlRepository _repository;
         IMapper _mapper;
 
-        public GroupController(IDowiezPlRepository repository, IMapper mapper, UserManager<AppUser> userManager) : base(userManager)
+        public GroupsController(IDowiezPlRepository repository, IMapper mapper, UserManager<AppUser> userManager) : base(userManager)
         {
             _repository = repository;
             _mapper = mapper;

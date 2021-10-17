@@ -14,12 +14,12 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace DowiezPlBackend.Controllers
 {
-    public class OpinionController : DowiezPlControllerBase
+    public class OpinionsController : DowiezPlControllerBase
     {
         IDowiezPlRepository _repository;
         IMapper _mapper;
 
-        public OpinionController(IDowiezPlRepository repository, IMapper mapper, UserManager<AppUser> userManager) : base(userManager)
+        public OpinionsController(IDowiezPlRepository repository, IMapper mapper, UserManager<AppUser> userManager) : base(userManager)
         {
             _repository = repository;
             _mapper = mapper;

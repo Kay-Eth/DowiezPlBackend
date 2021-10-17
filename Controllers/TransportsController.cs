@@ -15,12 +15,12 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace DowiezPlBackend.Controllers
 {
-    public class TransportController : DowiezPlControllerBase
+    public class TransportsController : DowiezPlControllerBase
     {
         IDowiezPlRepository _repository;
         IMapper _mapper;
         
-        public TransportController(IDowiezPlRepository repository, IMapper mapper, UserManager<AppUser> userManager) : base(userManager)
+        public TransportsController(IDowiezPlRepository repository, IMapper mapper, UserManager<AppUser> userManager) : base(userManager)
         {
             _repository = repository;
             _mapper = mapper;
