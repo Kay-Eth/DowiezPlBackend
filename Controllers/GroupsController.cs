@@ -6,6 +6,7 @@ using AutoMapper;
 using DowiezPlBackend.Data;
 using DowiezPlBackend.Dtos;
 using DowiezPlBackend.Dtos.Group;
+using DowiezPlBackend.Enums;
 using DowiezPlBackend.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
@@ -85,7 +86,8 @@ namespace DowiezPlBackend.Controllers
 
             var conversation = new Conversation()
             {
-                CreationDate = DateTime.UtcNow
+                CreationDate = DateTime.UtcNow,
+                Category = ConversationCategory.Group
             };
 
             group.GroupConversation = conversation;

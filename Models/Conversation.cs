@@ -13,6 +13,9 @@ namespace DowiezPlBackend.Models
         [Required]
         public DateTime CreationDate { get; set; }
 
+        [Required]
+        public ConversationCategory Category { get; set; }
+
         public Group OwnerGroup { get; set; }
 
         public ICollection<Message> Messages { get; set; }
