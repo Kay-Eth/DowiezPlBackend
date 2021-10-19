@@ -39,6 +39,7 @@ namespace DowiezPlBackend.Data
         void CreateMember(Member member);
         Task<Member> GetMemberAsync(Guid member);
         Task<Member> GetMemberNotTrackedAsync(Guid member);
+        Task<List<Member>> GetUserMembershipsAsync(Guid userId);
         Task<List<Member>> GetGroupMembersAsync(Guid groupId);
         void DeleteMember(Member member);
 
@@ -64,7 +65,7 @@ namespace DowiezPlBackend.Data
         Task<List<Transport>> SearchTransportsAsync(
             ICollection<TransportCategory> categories,
             Guid? startsInCityId,
-            Guid endsInCityId
+            Guid? endsInCityId
         );
         Task<List<Transport>> GetUserTransportsAsync(Guid userId);
         Task<Transport> GetTransportAsync(Guid transportId);

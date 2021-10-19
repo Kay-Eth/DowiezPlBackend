@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using AutoMapper;
 using DowiezPlBackend.Data;
@@ -39,15 +40,7 @@ namespace DowiezPlBackend.Controllers
             var groupFromRepo = await _repository.GetGroupNotTrackedAsync(groupId);
             if (groupFromRepo == null)
                 return NotFound();
-            
-            // var userDb = await GetMyUserAsync();
 
-            // if (!await IsModerator(userDb))
-            // {
-            //     if (!await _repository.IsUserAMemberOfAGroup(userDb.Id, groupFromRepo.GroupId))
-            //         return Forbid();
-            // }
-            
             return Ok(_mapper.Map<GroupReadDto>(groupFromRepo));
         }
 
@@ -63,6 +56,15 @@ namespace DowiezPlBackend.Controllers
             return Ok(_mapper.Map<IEnumerable<GroupReadDto>>(groups));
         }
 
+        [HttpGet("my")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        public async Task<ActionResult<IEnumerable<GroupReadDto>>> GetMyGroups()
+        {
+            var me = await GetMyUserAsync();
+            var groups = (await _repository.GetUserMembershipsAsync(me.Id)).Select(m => m.Group);
+            return Ok(_mapper.Map<IEnumerable<GroupReadDto>>(groups));
+        }
+
         /// <summary>
         /// Creates a group
         /// </summary>
@@ -75,11 +77,11 @@ namespace DowiezPlBackend.Controllers
         [ProducesResponseType(typeof(ErrorMessage), StatusCodes.Status400BadRequest)]
         public async Task<ActionResult<GroupReadDto>> CreateGroup(GroupCreateDto groupCreateDto)
         {
-            var user = await GetMyUserAsync();
+            var me = await GetMyUserAsync();
 
             var group = _mapper.Map<Group>(groupCreateDto);
             group.CreationDate = DateTime.UtcNow;
-            group.Creator = user;
+            group.Creator = me;
 
             var conversation = new Conversation()
             {
@@ -116,9 +118,9 @@ namespace DowiezPlBackend.Controllers
             if (groupFromRepo == null)
                 return NotFound();
             
-            var userDb = await GetMyUserAsync();
+            var me = await GetMyUserAsync();
 
-            if (groupFromRepo.Creator.Id != userDb.Id)
+            if (groupFromRepo.Creator.Id != me.Id)
                 return Forbid();
             
             _mapper.Map(groupUpdateDto, groupFromRepo);
@@ -146,10 +148,10 @@ namespace DowiezPlBackend.Controllers
             if (groupFromRepo == null)
                 return NotFound();
             
-            var userDb = await GetMyUserAsync();
+            var me = await GetMyUserAsync();
 
-            if (!await IsModerator(userDb)
-                && groupFromRepo.Creator.Id != userDb.Id)
+            if (!await IsModerator(me)
+                && groupFromRepo.Creator.Id != me.Id)
             {
                 return Forbid();
             }
@@ -159,6 +161,35 @@ namespace DowiezPlBackend.Controllers
             if (!await _repository.SaveChangesAsync())
                 return BadRequest(new ErrorMessage("Failed to delete a group.", "GC_DG_1"));
 
+            return NoContent();
+        }
+
+        /// <summary>
+        /// Allows a user to join a group
+        /// </summary>
+        /// <param name="groupId"></param>
+        [HttpPost("{groupId}/join")]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(typeof(ErrorMessage), StatusCodes.Status400BadRequest)]
+        public async Task<ActionResult> JoinGroup(Guid groupId)
+        {
+            var groupFromRepo = await _repository.GetGroupAsync(groupId);
+            if (groupFromRepo == null)
+                return NotFound();
+            
+            var me = await GetMyUserAsync();
+
+            if (await _repository.IsUserAMemberOfAGroup(me.Id, groupFromRepo.GroupId))
+                return BadRequest(new ErrorMessage("You are already member of this group.", "GC_JG_1"));
+            
+            _repository.CreateMember(new Member() {
+                User = me,
+                Group = groupFromRepo
+            });
+
+            if (!await _repository.SaveChangesAsync())
+                return BadRequest(new ErrorMessage("Failed to join a group.", "GC_JG_2"));
+            
             return NoContent();
         }
     }

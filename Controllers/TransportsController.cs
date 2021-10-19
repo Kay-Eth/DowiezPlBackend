@@ -40,7 +40,7 @@ namespace DowiezPlBackend.Controllers
         public async Task<ActionResult<IEnumerable<TransportSimpleReadDto>>> GetSearchTransports(
             [Required] string categories,
             Guid? startCityId,
-            [Required] Guid endCityId)
+            Guid? endCityId)
         {
             var categories_array = categories.Split(",");
             var categories_list = new List<TransportCategory>();
@@ -64,9 +64,12 @@ namespace DowiezPlBackend.Controllers
                     return NotFound(new ErrorMessage("Start city not found.", "TC_GST_2"));
             }
             
-            var endCity = await _repository.GetCityNotTrackedAsync(endCityId);
-            if (endCity == null)
-                return NotFound(new ErrorMessage("End city not found.", "TC_GST_3"));
+            if (endCityId != null)
+            {
+                var endCity = await _repository.GetCityNotTrackedAsync((Guid)endCityId);
+                if (endCity == null)
+                    return NotFound(new ErrorMessage("End city not found.", "TC_GST_3"));
+            }
 
             var results = await _repository.SearchTransportsAsync(
                 categories_list,
