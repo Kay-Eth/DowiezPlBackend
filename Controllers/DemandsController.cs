@@ -298,7 +298,7 @@ namespace DowiezPlBackend.Controllers
         /// <response code="204">Demand successfully canceled</response>
         /// <response code="400">Failed to cancel demand</response>
         /// <response code="404">Demand not found</response>
-        [HttpPut("{demandId}/cancel")]
+        [HttpPost("{demandId}/cancel")]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(typeof(ErrorMessage), StatusCodes.Status400BadRequest)]
         public async Task<ActionResult> CancelDemand(Guid demandId)
@@ -330,6 +330,39 @@ namespace DowiezPlBackend.Controllers
                 return BadRequest(new ErrorMessage("Failed to cancel a demand.", "DC_CaD_3"));
             
             return NoContent();
+        }
+
+        /// <summary>
+        /// Ask to carry a demand within a transport (NOT IMPLEMENTED)
+        /// </summary>
+        /// <param name="demandId"></param>
+        /// <param name="transportId"></param>
+        [HttpPost("{demandId}/ask/{transportId}")]
+        public async Task<ActionResult> AskForTransport(Guid demandId, Guid transportId)
+        {
+            return null;
+        }
+
+        /// <summary>
+        /// Accepts transport proposition (NOT IMPLEMENTED)
+        /// </summary>
+        /// <param name="demandId"></param>
+        /// <param name="transportId"></param>
+        [HttpPost("{demandId}/accept/{transportId}")]
+        public async Task<ActionResult> AcceptProposition(Guid demandId, Guid transportId)
+        {
+            return null;
+        }
+
+        /// <summary>
+        /// Denies transport proposition (NOT IMPLEMENTED)
+        /// </summary>
+        /// <param name="demandId"></param>
+        /// <param name="transportId"></param>
+        [HttpPost("{demandId}/deny/{transportId}")]
+        public async Task<ActionResult> DenyProposition(Guid demandId, Guid transportId)
+        {
+            return null;
         }
     }
 }

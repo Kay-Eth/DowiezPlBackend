@@ -219,7 +219,7 @@ namespace DowiezPlBackend.Controllers
         /// <response code="204">Transport successfully canceled</response>
         /// <response code="400">Failed to cancel transport</response>
         /// <response code="404">Transport not found</response>
-        [HttpPut("{transportId}/cancel")]
+        [HttpPost("{transportId}/cancel")]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(typeof(ErrorMessage), StatusCodes.Status400BadRequest)]
         public async Task<ActionResult> CancelTransport(Guid transportId)
@@ -272,6 +272,53 @@ namespace DowiezPlBackend.Controllers
             
             var result = transportFromRepo.Demands;
             return Ok(_mapper.Map<IEnumerable<DemandSimpleReadDto>>(result));
+        }
+
+        /// <summary>
+        /// Accept request to carry a demand within a transport (NOT IMPLEMENTED)
+        /// </summary>
+        /// <param name="transportId"></param>
+        /// <param name="demandId"></param>
+        /// <returns></returns>
+        [HttpPost("{transportId}/accept/{demandId}")]
+        public async Task<ActionResult> AcceptTransportOfDemand(Guid transportId, Guid demandId)
+        {
+            return null;
+        }
+
+        /// <summary>
+        /// Denies request to carry a demand within a transport (NOT IMPLEMENTED)
+        /// </summary>
+        /// <param name="transportId"></param>
+        /// <param name="demandId"></param>
+        /// <returns></returns>
+        [HttpPost("{transportId}/deny/{demandId}")]
+        public async Task<ActionResult> DenyTransportOfDemand(Guid transportId, Guid demandId)
+        {
+            return null;
+        }
+
+        /// <summary>
+        /// Proposes to carry a demand within a transport (NOT IMPLEMENTED)
+        /// </summary>
+        /// <param name="transportId"></param>
+        /// <param name="demandId"></param>
+        /// <returns></returns>
+        [HttpPost("{transportId}/propose/{demandId}")]
+        public async Task<ActionResult> ProposeTransportOfDemand(Guid transportId, Guid demandId)
+        {
+            return null;
+        }
+
+        /// <summary>
+        /// Begins a transport (NOT IMPLEMENTED)
+        /// </summary>
+        /// <param name="transportId"></param>
+        /// <returns></returns>
+        [HttpPost("{transportId}/begin")]
+        public async Task<ActionResult> BeginTransport(Guid transportId)
+        {
+            return null;
         }
     }
 }
