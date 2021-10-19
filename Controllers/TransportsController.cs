@@ -369,7 +369,7 @@ namespace DowiezPlBackend.Controllers
         }
 
         /// <summary>
-        /// Proposes to carry a demand within a transport (NOT IMPLEMENTED)
+        /// Proposes to carry a demand within a transport
         /// </summary>
         /// <param name="transportId">Transport's id</param>
         /// <param name="demandId">Demand's id</param>
@@ -411,23 +411,82 @@ namespace DowiezPlBackend.Controllers
         }
 
         /// <summary>
-        /// Begins a transport (NOT IMPLEMENTED)
+        /// Begins a transport
         /// </summary>
-        /// <param name="transportId"></param>
+        /// <param name="transportId">Transport's id</param>
+        /// <response code="204">Transport started</response>
+        /// <response code="400">Failed to start a transport</response>
+        /// <response code="403">Only creator of a transport can do this</response>
+        /// <response code="404">Transport not found</response>
         [HttpPost("{transportId}/begin")]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(typeof(ErrorMessage), StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(typeof(ErrorMessage), StatusCodes.Status404NotFound)]
         public async Task<ActionResult> BeginTransport(Guid transportId)
         {
-            return null;
+            var me = await GetMyUserAsync();
+            var transportFromRepo = await _repository.GetTransportAsync(transportId);
+
+            if (transportFromRepo == null)
+                return NotFound(new ErrorMessage("Transport not found.", "TC_BT_1"));
+            
+            if (transportFromRepo.Creator.Id != me.Id)
+                return Forbid();
+            
+            if (transportFromRepo.Status != TransportStatus.Declared)
+                return BadRequest(new ErrorMessage("Only transport with status Declared can be started.", "TC_BT_2"));
+            
+            transportFromRepo.Status = TransportStatus.InProgress;
+            foreach (var demand in transportFromRepo.Demands)
+            {
+                if (demand.Status == DemandStatus.Accepted)
+                    demand.Status = DemandStatus.InProgress;
+                else
+                    demand.Status = DemandStatus.Created;
+            }
+
+            if (!await _repository.SaveChangesAsync())
+                return BadRequest(new ErrorMessage("Failed to start a transport.", "TC_BT_3"));
+            
+            return NoContent();
         }
 
         /// <summary>
-        /// Finishes a transport (NOT IMPLEMENTED)
+        /// Finishes a transport
         /// </summary>
-        /// <param name="transportId"></param>
+        /// <param name="transportId">Transport's id</param>
+        /// <response code="204">Transport finish</response>
+        /// <response code="400">Failed to finish a transport</response>
+        /// <response code="403">Only creator of a transport can do this</response>
+        /// <response code="404">Transport not found</response>
         [HttpPost("{transportId}/finish")]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(typeof(ErrorMessage), StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(typeof(ErrorMessage), StatusCodes.Status404NotFound)]
         public async Task<ActionResult> FinishTransport(Guid transportId)
         {
-            return null;
+            var me = await GetMyUserAsync();
+            var transportFromRepo = await _repository.GetTransportAsync(transportId);
+
+            if (transportFromRepo == null)
+                return NotFound(new ErrorMessage("Transport not found.", "TC_FT_1"));
+            
+            if (transportFromRepo.Creator.Id != me.Id)
+                return Forbid();
+            
+            if (transportFromRepo.Status != TransportStatus.Declared)
+                return BadRequest(new ErrorMessage("Only transport with status InProgress can be finished.", "TC_FT_2"));
+            
+            transportFromRepo.Status = TransportStatus.Finished;
+            foreach (var demand in transportFromRepo.Demands)
+            {
+                demand.Status = DemandStatus.Finished;
+            }
+
+            if (!await _repository.SaveChangesAsync())
+                return BadRequest(new ErrorMessage("Failed to finish a transport.", "TC_FT_3"));
+            
+            return NoContent();
         }
     }
 }

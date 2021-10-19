@@ -22,7 +22,7 @@ namespace DowiezPlBackend.Data
             AppUser excludeUser,
             ICollection<DemandCategory> categories,
             Guid? fromCityId,
-            Guid destinationCityId,
+            Guid? destinationCityId,
             Guid? limitedToGroupId
         );
         Task<List<Demand>> GetUserDemandsAsync(Guid userId);

@@ -46,7 +46,7 @@ namespace DowiezPlBackend.Controllers
         public async Task<ActionResult<IEnumerable<DemandSimpleReadDto>>> GetSearchDemands(
             [Required] string categories,
             Guid? fromCityId,
-            [Required] Guid destinationCityId,
+            Guid? destinationCityId,
             Guid? limitedToGroupId)
         {
             var user = await GetMyUserAsync();
@@ -81,9 +81,12 @@ namespace DowiezPlBackend.Controllers
                     return NotFound(new ErrorMessage("From city not found.", "DC_GSD_2"));
             }
 
-            var destCity = await _repository.GetCityNotTrackedAsync(destinationCityId);
-            if (destCity == null)
-                return NotFound(new ErrorMessage("Destination city not found.", "DC_GSD_3"));
+            if (destinationCityId != null)
+            {
+                var destCity = await _repository.GetCityNotTrackedAsync((Guid)destinationCityId);
+                if (destCity == null)
+                    return NotFound(new ErrorMessage("Destination city not found.", "DC_GSD_3"));
+            }
 
             var results = await _repository.SearchDemandsAsync(
                 user,
@@ -133,7 +136,7 @@ namespace DowiezPlBackend.Controllers
         /// </summary>
         /// <param name="demandId"></param>
         /// <response code="200">Returns data of demands</response>
-        /// <response code="403">Demand is limited to a group, that you don't have access to</response>
+        /// <response code="403">Only member of a group can limit demand to a group</response>
         /// <response code="404">Demand not found</response>
         [HttpGet("{demandId}", Name = "GetDemand")]
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
@@ -162,6 +165,7 @@ namespace DowiezPlBackend.Controllers
         /// <param name="demandCreateDto">Demand's data</param>
         /// <response code="201">Returns data of a created demand</response>
         /// <response code="400">Failed to create a demand</response>
+        /// <response code="403">Only member of a group can limit demand to a group</response>
         /// <response code="404">City, user or group not found</response>
         [HttpPost]
         [Authorize(Roles = "Standard")]
@@ -227,6 +231,7 @@ namespace DowiezPlBackend.Controllers
         /// <param name="demandUpdateDto">Demand's new data</param>
         /// <response code="200">Returns data of a updated demand</response>
         /// <response code="400">Failed to update a demand</response>
+        /// <response code="403">Only creator of a demand can do this</response>
         /// <response code="404">City, user or group not found</response>
         [HttpPut]
         [Authorize(Roles = "Standard")]
@@ -297,6 +302,7 @@ namespace DowiezPlBackend.Controllers
         /// <param name="demandId">Demand's Id</param>
         /// <response code="204">Demand successfully canceled</response>
         /// <response code="400">Failed to cancel demand</response>
+        /// <response code="403">Only creator of a demand can do this</response>
         /// <response code="404">Demand not found</response>
         [HttpPost("{demandId}/cancel")]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
@@ -340,6 +346,8 @@ namespace DowiezPlBackend.Controllers
         [HttpPost("{demandId}/ask/{transportId}")]
         public async Task<ActionResult> AskForTransport(Guid demandId, Guid transportId)
         {
+            var me = await GetMyUserAsync();
+            var demandFromRepo = await _repository.GetDemandAsync(demandId);
             return null;
         }
 
