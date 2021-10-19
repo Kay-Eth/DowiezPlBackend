@@ -173,6 +173,7 @@ namespace DowiezPlBackend.Controllers
         /// <param name="transportUpdateDto">Transport's new data</param>
         /// <response code="200">Returns data of a updated transport</response>
         /// <response code="400">Failed to update a transport</response>
+        /// <response code="403">Only creator of a transport can do this</response>
         /// <response code="404">City not found</response>
         [HttpPut]
         [Authorize(Roles = "Standard")]
@@ -218,6 +219,7 @@ namespace DowiezPlBackend.Controllers
         /// <param name="transportId">Transport's Id</param>
         /// <response code="204">Transport successfully canceled</response>
         /// <response code="400">Failed to cancel transport</response>
+        /// <response code="403">Only creator of a transport can do this</response>
         /// <response code="404">Transport not found</response>
         [HttpPost("{transportId}/cancel")]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
@@ -259,6 +261,7 @@ namespace DowiezPlBackend.Controllers
         /// </summary>
         /// <param name="transportId"></param>
         /// <response code="200">Returns data of demands</response>
+        /// <response code="403">Only creator of a transport can do this</response>
         /// <response code="404">Transport not found</response>
         [HttpGet("{transportId}/demands")]
         [ProducesResponseType(StatusCodes.Status200OK)]
@@ -270,53 +273,159 @@ namespace DowiezPlBackend.Controllers
             if (transportFromRepo == null)
                 return NotFound();
             
+            if (transportFromRepo.Creator.Id != me.Id)
+                return Forbid();
+            
             var result = transportFromRepo.Demands;
             return Ok(_mapper.Map<IEnumerable<DemandSimpleReadDto>>(result));
         }
 
         /// <summary>
-        /// Accept request to carry a demand within a transport (NOT IMPLEMENTED)
+        /// Accept request to carry a demand within a transport
         /// </summary>
-        /// <param name="transportId"></param>
-        /// <param name="demandId"></param>
-        /// <returns></returns>
+        /// <param name="transportId">Transport's id</param>
+        /// <param name="demandId">Demand's id</param>
+        /// <response code="204">Demand carry accepted</response>
+        /// <response code="400">Failed to accept transport of demand</response>
+        /// <response code="403">Only creator of a transport can do this</response>
+        /// <response code="404">Demand or transport not found</response>
         [HttpPost("{transportId}/accept/{demandId}")]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(typeof(ErrorMessage), StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(typeof(ErrorMessage), StatusCodes.Status404NotFound)]
         public async Task<ActionResult> AcceptTransportOfDemand(Guid transportId, Guid demandId)
         {
-            return null;
+            var me = await GetMyUserAsync();
+            var transportFromRepo = await _repository.GetTransportNotTrackedAsync(transportId);
+
+            if (transportFromRepo == null)
+                return NotFound(new ErrorMessage("Transport not found.", "TC_AToD_1"));
+            
+            if (transportFromRepo.Creator.Id != me.Id)
+                return Forbid();
+            
+            if (transportFromRepo.Status != TransportStatus.Declared)
+                return BadRequest(new ErrorMessage("Only transport with status Declared can accept demands.", "TC_AToD_2"));
+            
+            var demandFromRepo = await _repository.GetDemandAsync(demandId);
+            if (demandFromRepo == null)
+                return NotFound(new ErrorMessage("Demand not found.", "TC_AToD_3"));
+            
+            if (demandFromRepo.Transport.TransportId != transportFromRepo.TransportId)
+                return BadRequest(new ErrorMessage("Only demand connected to this transport can be accepted.", "TC_AToD_4"));
+
+            if (demandFromRepo.Status != DemandStatus.TransportRequested)
+                return BadRequest(new ErrorMessage("Only demand with status TransportRequested can be accepted.", "TC_AToD_5"));
+
+            demandFromRepo.Status = DemandStatus.Accepted;
+            if (!await _repository.SaveChangesAsync())
+                return BadRequest(new ErrorMessage("Failed to accept a demand.", "TC_AToD_6"));
+
+            return NoContent();
         }
 
         /// <summary>
         /// Denies request to carry a demand within a transport (NOT IMPLEMENTED)
         /// </summary>
-        /// <param name="transportId"></param>
-        /// <param name="demandId"></param>
-        /// <returns></returns>
+        /// <param name="transportId">Transport's id</param>
+        /// <param name="demandId">Demand's id</param>
+        /// <response code="204">Demand carry denied</response>
+        /// <response code="400">Failed to deny transport of demand</response>
+        /// <response code="403">Only creator of a transport can do this</response>
+        /// <response code="404">Demand or transport not found</response>
         [HttpPost("{transportId}/deny/{demandId}")]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(typeof(ErrorMessage), StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(typeof(ErrorMessage), StatusCodes.Status404NotFound)]
         public async Task<ActionResult> DenyTransportOfDemand(Guid transportId, Guid demandId)
         {
-            return null;
+            var me = await GetMyUserAsync();
+            var transportFromRepo = await _repository.GetTransportNotTrackedAsync(transportId);
+
+            if (transportFromRepo == null)
+                return NotFound(new ErrorMessage("Transport not found.", "TC_DToD_1"));
+            
+            if (transportFromRepo.Creator.Id != me.Id)
+                return Forbid();
+            
+            if (transportFromRepo.Status != TransportStatus.Declared)
+                return BadRequest(new ErrorMessage("Only transport with status Declared can deny demands.", "TC_DToD_2"));
+            
+            var demandFromRepo = await _repository.GetDemandAsync(demandId);
+            if (demandFromRepo == null)
+                return NotFound(new ErrorMessage("Demand not found.", "TC_DToD_3"));
+            
+            if (demandFromRepo.Transport.TransportId != transportFromRepo.TransportId)
+                return BadRequest(new ErrorMessage("Only demand connected to this transport can be denied.", "TC_DToD_4"));
+
+            if (demandFromRepo.Status != DemandStatus.TransportRequested)
+                return BadRequest(new ErrorMessage("Only demand with status TransportRequested can be denied.", "TC_DToD_5"));
+
+            demandFromRepo.Status = DemandStatus.Created;
+            if (!await _repository.SaveChangesAsync())
+                return BadRequest(new ErrorMessage("Failed to deny a demand.", "TC_DToD_6"));
+
+            return NoContent();
         }
 
         /// <summary>
         /// Proposes to carry a demand within a transport (NOT IMPLEMENTED)
         /// </summary>
-        /// <param name="transportId"></param>
-        /// <param name="demandId"></param>
-        /// <returns></returns>
+        /// <param name="transportId">Transport's id</param>
+        /// <param name="demandId">Demand's id</param>
+        /// <response code="204">Proposed to carry a Demand</response>
+        /// <response code="400">Failed to propose carring of demand</response>
+        /// <response code="403">Only creator of a transport can do this</response>
+        /// <response code="404">Demand or transport not found</response>
         [HttpPost("{transportId}/propose/{demandId}")]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(typeof(ErrorMessage), StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(typeof(ErrorMessage), StatusCodes.Status404NotFound)]
         public async Task<ActionResult> ProposeTransportOfDemand(Guid transportId, Guid demandId)
         {
-            return null;
+            var me = await GetMyUserAsync();
+            var transportFromRepo = await _repository.GetTransportAsync(transportId);
+
+            if (transportFromRepo == null)
+                return NotFound(new ErrorMessage("Transport not found.", "TC_PToD_1"));
+            
+            if (transportFromRepo.Creator.Id != me.Id)
+                return Forbid();
+            
+            if (transportFromRepo.Status != TransportStatus.Declared)
+                return BadRequest(new ErrorMessage("Only transport with status Declared can propose carring of demands.", "TC_PToD_2"));
+            
+            var demandFromRepo = await _repository.GetDemandAsync(demandId);
+            if (demandFromRepo == null)
+                return NotFound(new ErrorMessage("Demand not found.", "TC_PToD_3"));
+            
+            if (demandFromRepo.Status != DemandStatus.Created)
+                return BadRequest(new ErrorMessage("Only demand with status Created can be proposed to transport.", "TC_PToD_4"));
+
+            demandFromRepo.Status = DemandStatus.TransportProposed;
+            demandFromRepo.Transport = transportFromRepo;
+            if (!await _repository.SaveChangesAsync())
+                return BadRequest(new ErrorMessage("Failed to propose carring a demand.", "TC_PToD_5"));
+
+            return NoContent();
         }
 
         /// <summary>
         /// Begins a transport (NOT IMPLEMENTED)
         /// </summary>
         /// <param name="transportId"></param>
-        /// <returns></returns>
         [HttpPost("{transportId}/begin")]
         public async Task<ActionResult> BeginTransport(Guid transportId)
+        {
+            return null;
+        }
+
+        /// <summary>
+        /// Finishes a transport (NOT IMPLEMENTED)
+        /// </summary>
+        /// <param name="transportId"></param>
+        [HttpPost("{transportId}/finish")]
+        public async Task<ActionResult> FinishTransport(Guid transportId)
         {
             return null;
         }

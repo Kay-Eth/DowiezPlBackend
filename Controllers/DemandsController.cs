@@ -179,14 +179,14 @@ namespace DowiezPlBackend.Controllers
 
             if (demandCreateDto.FromCityId != null)
             {
-                var cityFrom = await _repository.GetCityNotTrackedAsync((Guid)(demandCreateDto.FromCityId));
+                var cityFrom = await _repository.GetCityAsync((Guid)(demandCreateDto.FromCityId));
                 if (cityFrom == null)
                     return NotFound(new ErrorMessage("City From does not exist.", "DC_CD_1"));
 
                 demand.From = cityFrom;
             }
 
-            var cityDest = await _repository.GetCityNotTrackedAsync(demandCreateDto.DestinationCityId);
+            var cityDest = await _repository.GetCityAsync(demandCreateDto.DestinationCityId);
             if (cityDest == null)
                 return NotFound(new ErrorMessage("City Destination does not exist.", "DC_CD_2"));
             
@@ -203,7 +203,7 @@ namespace DowiezPlBackend.Controllers
 
             if (demandCreateDto.LimitedToGroupId != null)
             {
-                var group = await _repository.GetGroupNotTrackedAsync((Guid)(demandCreateDto.LimitedToGroupId));
+                var group = await _repository.GetGroupAsync((Guid)(demandCreateDto.LimitedToGroupId));
                 if (group == null)
                     return NotFound(new ErrorMessage("Group does not exist.", "DC_CD_4"));
                 
@@ -361,6 +361,17 @@ namespace DowiezPlBackend.Controllers
         /// <param name="transportId"></param>
         [HttpPost("{demandId}/deny/{transportId}")]
         public async Task<ActionResult> DenyProposition(Guid demandId, Guid transportId)
+        {
+            return null;
+        }
+
+        /// <summary>
+        /// Cancels transport of demand
+        /// </summary>
+        /// <param name="demandId"></param>
+        /// <param name="transportId"></param>
+        [HttpPost("{demandId}/cancel/{transportId}")]
+        public async Task<ActionResult> CancelTransportOfDemand(Guid demandId, Guid transportId)
         {
             return null;
         }
