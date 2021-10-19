@@ -328,7 +328,7 @@ namespace DowiezPlBackend.Controllers
         }
 
         /// <summary>
-        /// Denies request to carry a demand within a transport (NOT IMPLEMENTED)
+        /// Denies request to carry a demand within a transport
         /// </summary>
         /// <param name="transportId">Transport's id</param>
         /// <param name="demandId">Demand's id</param>
