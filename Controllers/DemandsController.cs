@@ -305,6 +305,7 @@ namespace DowiezPlBackend.Controllers
         /// <response code="403">Only creator of a demand can do this</response>
         /// <response code="404">Demand not found</response>
         [HttpPost("{demandId}/cancel")]
+        [Authorize(Roles = "Standard")]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(typeof(ErrorMessage), StatusCodes.Status400BadRequest)]
         public async Task<ActionResult> CancelDemand(Guid demandId)
@@ -339,49 +340,146 @@ namespace DowiezPlBackend.Controllers
         }
 
         /// <summary>
-        /// Ask to carry a demand within a transport (NOT IMPLEMENTED)
+        /// Request to carry a demand within a transport
         /// </summary>
-        /// <param name="demandId"></param>
-        /// <param name="transportId"></param>
-        [HttpPost("{demandId}/ask/{transportId}")]
-        public async Task<ActionResult> AskForTransport(Guid demandId, Guid transportId)
+        /// <param name="demandId">Demand's Id</param>
+        /// <param name="transportId">Transport's Id</param>
+        /// <response code="204">Successfully requested transport</response>
+        /// <response code="400">Failed to request transport</response>
+        /// <response code="403">Only creator of a demand can do this</response>
+        /// <response code="404">Demand or transport not found</response>
+        [HttpPost("{demandId}/request/{transportId}")]
+        [Authorize(Roles = "Standard")]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(typeof(ErrorMessage), StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(typeof(ErrorMessage), StatusCodes.Status404NotFound)]
+        public async Task<ActionResult> RequestForTransport(Guid demandId, Guid transportId)
         {
             var me = await GetMyUserAsync();
             var demandFromRepo = await _repository.GetDemandAsync(demandId);
-            return null;
+            
+            if (demandFromRepo == null)
+                return NotFound(new ErrorMessage("Demand not found.", "DC_AfT_1"));
+            
+            if (demandFromRepo.Creator.Id != me.Id)
+                return Forbid();
+            
+            if (demandFromRepo.Status != DemandStatus.Created)
+                return BadRequest(new ErrorMessage("Only demand with status Created can ask fo transport.", "DC_AfT_2"));
+            
+            var transportFromRepo = await _repository.GetTransportAsync(transportId);
+            if (transportFromRepo == null)
+                return NotFound(new ErrorMessage("Transport not found.", "DC_AfT_3"));
+            
+            if (transportFromRepo.Status != TransportStatus.Declared)
+                return BadRequest(new ErrorMessage("Only transport with status Declared can be asked for transport.", "DC_AfT_4"));
+            
+            demandFromRepo.Transport = transportFromRepo;
+            demandFromRepo.Status = DemandStatus.TransportRequested;
+
+            if (!await _repository.SaveChangesAsync())
+                return BadRequest(new ErrorMessage("Failed to request for a transport.", "DC_AfT_5"));
+            
+            return NoContent();
         }
 
         /// <summary>
-        /// Accepts transport proposition (NOT IMPLEMENTED)
+        /// Accepts transport proposition
         /// </summary>
-        /// <param name="demandId"></param>
-        /// <param name="transportId"></param>
-        [HttpPost("{demandId}/accept/{transportId}")]
-        public async Task<ActionResult> AcceptProposition(Guid demandId, Guid transportId)
+        /// <param name="demandId">Demand's Id</param>
+        /// <response code="204">Successfully accepted proposition</response>
+        /// <response code="400">Failed to accept proposition</response>
+        /// <response code="403">Only creator of a demand can do this</response>
+        /// <response code="404">Demand not found</response>
+        [HttpPost("{demandId}/acceptProposition")]
+        [Authorize(Roles = "Standard")]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(typeof(ErrorMessage), StatusCodes.Status400BadRequest)]
+        public async Task<ActionResult> AcceptProposition(Guid demandId)
         {
-            return null;
+            var me = await GetMyUserAsync();
+            var demandFromRepo = await _repository.GetDemandAsync(demandId);
+            
+            if (demandFromRepo == null)
+                return NotFound(new ErrorMessage("Demand not found.", "DC_AP_1"));
+            
+            if (demandFromRepo.Creator.Id != me.Id)
+                return Forbid();
+            
+            if (demandFromRepo.Status != DemandStatus.TransportProposed)
+                return BadRequest(new ErrorMessage("Only demand with status TransportProposed can accept proposition for transport.", "DC_AP_2"));
+            
+            demandFromRepo.Status = DemandStatus.Accepted;
+            if (!await _repository.SaveChangesAsync())
+                return BadRequest(new ErrorMessage("Failed to accept proposition for a transport.", "DC_AP_3"));
+            
+            return NoContent();
         }
 
         /// <summary>
-        /// Denies transport proposition (NOT IMPLEMENTED)
+        /// Denies transport proposition
         /// </summary>
-        /// <param name="demandId"></param>
-        /// <param name="transportId"></param>
-        [HttpPost("{demandId}/deny/{transportId}")]
-        public async Task<ActionResult> DenyProposition(Guid demandId, Guid transportId)
+        /// <param name="demandId">Demand's Id</param>
+        /// <response code="204">Successfully denied proposition</response>
+        /// <response code="400">Failed to deny proposition</response>
+        /// <response code="403">Only creator of a demand can do this</response>
+        /// <response code="404">Demand not found</response>
+        [HttpPost("{demandId}/denyProposition")]
+        [Authorize(Roles = "Standard")]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(typeof(ErrorMessage), StatusCodes.Status400BadRequest)]
+        public async Task<ActionResult> DenyProposition(Guid demandId)
         {
-            return null;
+            var me = await GetMyUserAsync();
+            var demandFromRepo = await _repository.GetDemandAsync(demandId);
+            
+            if (demandFromRepo == null)
+                return NotFound(new ErrorMessage("Demand not found.", "DC_DP_1"));
+            
+            if (demandFromRepo.Creator.Id != me.Id)
+                return Forbid();
+            
+            if (demandFromRepo.Status != DemandStatus.TransportProposed)
+                return BadRequest(new ErrorMessage("Only demand with status TransportProposed can deny proposition for transport.", "DC_DP_2"));
+            
+            demandFromRepo.Status = DemandStatus.Created;
+            demandFromRepo.Transport = null;
+            if (!await _repository.SaveChangesAsync())
+                return BadRequest(new ErrorMessage("Failed to deny proposition for a transport.", "DC_DP_3"));
+            
+            return NoContent();
         }
 
         /// <summary>
         /// Cancels transport of demand
         /// </summary>
-        /// <param name="demandId"></param>
-        /// <param name="transportId"></param>
-        [HttpPost("{demandId}/cancel/{transportId}")]
-        public async Task<ActionResult> CancelTransportOfDemand(Guid demandId, Guid transportId)
+        /// <param name="demandId">Demand's Id</param>
+        /// <response code="204">Successfully canceled transport of demand</response>
+        /// <response code="400">Failed to cancel transport of demand</response>
+        /// <response code="403">Only creator of a demand can do this</response>
+        /// <response code="404">Demand not found</response>
+        [HttpPost("{demandId}/cancelTransport")]
+        [Authorize(Roles = "Standard")]
+        public async Task<ActionResult> CancelTransportOfDemand(Guid demandId)
         {
-            return null;
+            var me = await GetMyUserAsync();
+            var demandFromRepo = await _repository.GetDemandAsync(demandId);
+            
+            if (demandFromRepo == null)
+                return NotFound(new ErrorMessage("Demand not found.", "DC_CToD_1"));
+            
+            if (demandFromRepo.Creator.Id != me.Id)
+                return Forbid();
+            
+            if (demandFromRepo.Status != DemandStatus.Accepted)
+                return BadRequest(new ErrorMessage("Only demand with status Accepted can cancel transport.", "DC_CToD_2"));
+            
+            demandFromRepo.Status = DemandStatus.Created;
+            demandFromRepo.Transport = null;
+            if (!await _repository.SaveChangesAsync())
+                return BadRequest(new ErrorMessage("Failed to deny proposition for a transport.", "DC_CToD_3"));
+            
+            return NoContent();
         }
     }
 }

@@ -222,6 +222,7 @@ namespace DowiezPlBackend.Controllers
         /// <response code="403">Only creator of a transport can do this</response>
         /// <response code="404">Transport not found</response>
         [HttpPost("{transportId}/cancel")]
+        [Authorize(Roles = "Standard")]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(typeof(ErrorMessage), StatusCodes.Status400BadRequest)]
         public async Task<ActionResult> CancelTransport(Guid transportId)
@@ -264,6 +265,7 @@ namespace DowiezPlBackend.Controllers
         /// <response code="403">Only creator of a transport can do this</response>
         /// <response code="404">Transport not found</response>
         [HttpGet("{transportId}/demands")]
+        [Authorize(Roles = "Standard")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         public async Task<ActionResult<DemandSimpleReadDto>> GetTransportDemands(Guid transportId)
         {
@@ -290,6 +292,7 @@ namespace DowiezPlBackend.Controllers
         /// <response code="403">Only creator of a transport can do this</response>
         /// <response code="404">Demand or transport not found</response>
         [HttpPost("{transportId}/accept/{demandId}")]
+        [Authorize(Roles = "Standard")]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(typeof(ErrorMessage), StatusCodes.Status400BadRequest)]
         [ProducesResponseType(typeof(ErrorMessage), StatusCodes.Status404NotFound)]
@@ -334,6 +337,7 @@ namespace DowiezPlBackend.Controllers
         /// <response code="403">Only creator of a transport can do this</response>
         /// <response code="404">Demand or transport not found</response>
         [HttpPost("{transportId}/deny/{demandId}")]
+        [Authorize(Roles = "Standard")]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(typeof(ErrorMessage), StatusCodes.Status400BadRequest)]
         [ProducesResponseType(typeof(ErrorMessage), StatusCodes.Status404NotFound)]
@@ -378,6 +382,7 @@ namespace DowiezPlBackend.Controllers
         /// <response code="403">Only creator of a transport can do this</response>
         /// <response code="404">Demand or transport not found</response>
         [HttpPost("{transportId}/propose/{demandId}")]
+        [Authorize(Roles = "Standard")]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(typeof(ErrorMessage), StatusCodes.Status400BadRequest)]
         [ProducesResponseType(typeof(ErrorMessage), StatusCodes.Status404NotFound)]
@@ -419,6 +424,7 @@ namespace DowiezPlBackend.Controllers
         /// <response code="403">Only creator of a transport can do this</response>
         /// <response code="404">Transport not found</response>
         [HttpPost("{transportId}/begin")]
+        [Authorize(Roles = "Standard")]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(typeof(ErrorMessage), StatusCodes.Status400BadRequest)]
         [ProducesResponseType(typeof(ErrorMessage), StatusCodes.Status404NotFound)]
@@ -460,6 +466,7 @@ namespace DowiezPlBackend.Controllers
         /// <response code="403">Only creator of a transport can do this</response>
         /// <response code="404">Transport not found</response>
         [HttpPost("{transportId}/finish")]
+        [Authorize(Roles = "Standard")]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(typeof(ErrorMessage), StatusCodes.Status400BadRequest)]
         [ProducesResponseType(typeof(ErrorMessage), StatusCodes.Status404NotFound)]
