@@ -27,6 +27,8 @@ using DowiezPlBackend.Services;
 using DowiezPlBackend.Policies;
 using Microsoft.AspNetCore.Authorization;
 using DowiezPlBackend.Hubs;
+using Microsoft.AspNetCore.Http;
+using System.Text;
 
 namespace DowiezPlBackend
 {
@@ -78,8 +80,10 @@ namespace DowiezPlBackend
             });
             services.AddTransient<IAuthorizationHandler, NotBannedHandler>();
             
-            services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-                .AddJwtBearer(options => {
+            services.AddAuthentication(options => {
+                    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+                    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+                }).AddJwtBearer(options => {
                     options.TokenValidationParameters = new Microsoft.IdentityModel.Tokens.TokenValidationParameters()
                     {
                         ValidateIssuer = false,
@@ -90,6 +94,23 @@ namespace DowiezPlBackend
                             System.Text.Encoding.UTF8.GetBytes(Configuration["jwt:key"])
                         ),
                         ClockSkew = TimeSpan.Zero
+                    };
+                    options.Events = new JwtBearerEvents
+                    {
+                        OnMessageReceived = context => 
+                        {
+                            var accessToken = context.Request.Query["access_token"];
+                            var path = context.HttpContext.Request.Path;
+
+                            if (!string.IsNullOrEmpty(accessToken)
+                                && path.StartsWithSegments("/hubs/chat")
+                            )
+                            {
+                                context.Token = accessToken;
+                            }
+
+                            return Task.CompletedTask;
+                        }
                     };
                 });
 
@@ -201,7 +222,7 @@ namespace DowiezPlBackend
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllers();
-                endpoints.MapHub<ChatHub>("ChatHub");
+                endpoints.MapHub<ChatHub>("/hubs/chat");
             });
         }
     }

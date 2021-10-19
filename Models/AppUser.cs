@@ -51,5 +51,7 @@ namespace DowiezPlBackend.Models
 
         public ICollection<Participant> Participations { get; set; }
         public ICollection<Member> Memberships { get; set; }
+
+        public ICollection<Connection> Connections { get; set; }
     }
 }
