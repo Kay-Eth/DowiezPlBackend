@@ -39,7 +39,6 @@ namespace DowiezPlBackend.Controllers
         /// <response code="403">Cannot read demands from a group that user is not a member</response>
         /// <response code="404">City not found</response>
         [HttpGet("search")]
-        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(ErrorMessage), StatusCodes.Status400BadRequest)]
         [ProducesResponseType(typeof(ErrorMessage), StatusCodes.Status404NotFound)]

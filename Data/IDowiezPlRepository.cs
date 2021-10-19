@@ -53,6 +53,7 @@ namespace DowiezPlBackend.Data
         void DeleteOpinion(Opinion opinion);
 
         void CreateReport(Report report);
+        Task<List<Report>> GetIssuedReportsAsync();
         Task<List<Report>> GetReportsAsync();
         Task<List<Report>> GetUserReportsAsync(Guid userId);
         Task<Report> GetReportAsync(Guid reportId);
@@ -71,5 +72,10 @@ namespace DowiezPlBackend.Data
         void DeleteTransport(Transport transport);
 
         void CreateConversation(Conversation conversation);
+
+        Task<int> CountOfNewDemands(DateTime before);
+        Task<int> CountOfNewOpinions(DateTime before);
+        Task<int> CountOfNewTransports(DateTime before);
+        Task<int> CountOfNewGroups(DateTime before);
     }
 }

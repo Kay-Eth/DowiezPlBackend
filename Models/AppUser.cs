@@ -8,11 +8,24 @@ namespace DowiezPlBackend.Models
 {
     public class AppUser : IdentityUser<Guid>
     {
+        public AppUser() : base()
+        {
+            CreationDate = DateTime.UtcNow;
+        }
+
+        public AppUser(string userName) : base(userName)
+        {
+            CreationDate = DateTime.UtcNow;
+        }
+
         [PersonalData]
         public string FirstName { get; set; }
 
         [PersonalData]
         public string LastName { get; set; }
+
+        [Required]
+        public DateTime CreationDate { get; set; }
         
         public bool Banned { get; set; }
 

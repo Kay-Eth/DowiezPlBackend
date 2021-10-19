@@ -26,6 +26,15 @@ namespace DowiezPlBackend.Data
                 .ToListAsync();
         }
 
+        public async Task<List<Report>> GetIssuedReportsAsync()
+        {
+            return await _context.Reports.AsNoTracking()
+                .Where(r => r.Status == ReportStatus.Issued)
+                .Include(r => r.Reporter)
+                .Include(r => r.Reported)
+                .ToListAsync();
+        }
+
         public async Task<Report> GetReportAsync(Guid reportId)
         {
             return await _context.Reports
