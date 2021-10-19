@@ -92,6 +92,10 @@ namespace DowiezPlBackend.Controllers
 
             _repository.CreateConversation(conversation);
             _repository.CreateGroup(group);
+            _repository.CreateMember(new Member() {
+                User = me,
+                Group = group
+            });
 
             if (!await _repository.SaveChangesAsync())
                 return BadRequest(new ErrorMessage("Failed to create a group.", "GC_CG_1"));
@@ -157,6 +161,7 @@ namespace DowiezPlBackend.Controllers
             }
 
             _repository.DeleteGroup(groupFromRepo);
+            _repository.DeleteConversation(groupFromRepo.GroupConversation);
 
             if (!await _repository.SaveChangesAsync())
                 return BadRequest(new ErrorMessage("Failed to delete a group.", "GC_DG_1"));
@@ -167,7 +172,10 @@ namespace DowiezPlBackend.Controllers
         /// <summary>
         /// Allows a user to join a group
         /// </summary>
-        /// <param name="groupId"></param>
+        /// <param name="groupId">Group's Id</param>
+        /// <response code="204">Joined group successfully</response>
+        /// <response code="400">Joining a group failed</response>
+        /// <response code="404">Group not found</response>
         [HttpPost("{groupId}/join")]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(typeof(ErrorMessage), StatusCodes.Status400BadRequest)]
@@ -189,6 +197,39 @@ namespace DowiezPlBackend.Controllers
 
             if (!await _repository.SaveChangesAsync())
                 return BadRequest(new ErrorMessage("Failed to join a group.", "GC_JG_2"));
+            
+            return NoContent();
+        }
+
+        /// <summary>
+        /// Allows a user to leave a group. You cannot leave a group if you are a creator
+        /// </summary>
+        /// <param name="groupId">Group's Id</param>
+        /// <response code="204">Leaved group successfully</response>
+        /// <response code="400">Leaving a group failed</response>
+        /// <response code="404">Group not found</response>
+        [HttpPost("{groupId}/leave")]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(typeof(ErrorMessage), StatusCodes.Status400BadRequest)]
+        public async Task<ActionResult> LeaveGroup(Guid groupId)
+        {
+            var groupFromRepo = await _repository.GetGroupAsync(groupId);
+            if (groupFromRepo == null)
+                return NotFound();
+            
+            var me = await GetMyUserAsync();
+
+            var member = await _repository.GetMemberAsync(groupId, me.Id);
+            if (member == null)
+                return BadRequest(new ErrorMessage("You must be a member of this group to leave it.", "GC_LG_1"));
+
+            if (groupFromRepo.Creator.Id == me.Id)
+                return BadRequest(new ErrorMessage("You cannot leave a group you created.", "GC_LG_2"));
+
+            _repository.DeleteMember(member);
+
+            if (!await _repository.SaveChangesAsync())
+                return BadRequest(new ErrorMessage("Failed to leave a group.", "GC_LG_3"));
             
             return NoContent();
         }

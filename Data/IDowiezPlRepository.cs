@@ -38,6 +38,7 @@ namespace DowiezPlBackend.Data
 
         void CreateMember(Member member);
         Task<Member> GetMemberAsync(Guid member);
+        Task<Member> GetMemberAsync(Guid groupId, Guid userId);
         Task<Member> GetMemberNotTrackedAsync(Guid member);
         Task<List<Member>> GetUserMembershipsAsync(Guid userId);
         Task<List<Member>> GetGroupMembersAsync(Guid groupId);
@@ -73,6 +74,7 @@ namespace DowiezPlBackend.Data
         void DeleteTransport(Transport transport);
 
         void CreateConversation(Conversation conversation);
+        void DeleteConversation(Conversation conversation);
 
         Task<int> CountOfNewDemands(DateTime before);
         Task<int> CountOfNewOpinions(DateTime before);

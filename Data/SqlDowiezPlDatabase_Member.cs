@@ -26,6 +26,14 @@ namespace DowiezPlBackend.Data
                 .FirstOrDefaultAsync(m => m.MemberId == memberId);
         }
 
+        public async Task<Member> GetMemberAsync(Guid groupId, Guid userId)
+        {
+            return await _context.Members
+                .Include(m => m.Group)
+                .Include(m => m.User)
+                .FirstOrDefaultAsync(m => m.User.Id == userId && m.Group.GroupId == groupId);
+        }
+
         public async Task<Member> GetMemberNotTrackedAsync(Guid memberId)
         {
             return await _context.Members.AsNoTracking()

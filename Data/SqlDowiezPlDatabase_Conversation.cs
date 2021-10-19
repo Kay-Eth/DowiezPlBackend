@@ -12,5 +12,13 @@ namespace DowiezPlBackend.Data
             
             _context.Conversations.Add(conversation);
         }
+
+        public void DeleteConversation(Conversation conversation)
+        {
+            if (conversation == null)
+                throw new ArgumentNullException(nameof(conversation));
+
+            _context.Conversations.Remove(conversation);
+        }
     }
 }
