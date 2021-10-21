@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
+using System.Security.Authentication;
 using System.Security.Claims;
 using System.Threading.Tasks;
 using DowiezPlBackend.Models;
@@ -70,6 +71,11 @@ namespace DowiezPlBackend
                     .ConfigureWebHostDefaults(webBuilder =>
                     {
                         webBuilder.ConfigureKestrel(options => {
+                            options.ConfigureHttpsDefaults(co =>
+                            {
+                                co.SslProtocols = SslProtocols.Tls | SslProtocols.Tls11 | SslProtocols.Tls12 | SslProtocols.Tls13;
+                            });
+
                             var port = 5001;
                             var pfxFilePath = "/home/kayeth/DowiezPlBackendUpdate/certificate.pfx";
                             var pfxPassword = "DowiezPl1234@"; 
