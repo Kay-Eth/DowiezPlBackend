@@ -73,7 +73,7 @@ namespace DowiezPlBackend
                         webBuilder.ConfigureKestrel(options => {
                             options.ConfigureHttpsDefaults(co =>
                             {
-                                co.SslProtocols = SslProtocols.Tls | SslProtocols.Tls11 | SslProtocols.Tls12 | SslProtocols.Tls13;
+                                co.SslProtocols = SslProtocols.Tls | SslProtocols.Tls11 | SslProtocols.Tls12;
                             });
 
                             var port = 5001;
