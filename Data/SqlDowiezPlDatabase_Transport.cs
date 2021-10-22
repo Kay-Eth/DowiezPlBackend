@@ -59,6 +59,7 @@ namespace DowiezPlBackend.Data
                 .Include(c => c.StartsIn)
                 .Include(c => c.EndsIn)
                 .Include(u => u.Creator)
+                .Include(t => t.TransportConversation)
                 .Where(t => t.Creator.Id == userId)
                 .ToListAsync();
         }
@@ -70,6 +71,7 @@ namespace DowiezPlBackend.Data
                 .Include(c => c.EndsIn)
                 .Include(u => u.Creator)
                 .Include(d => d.Demands)
+                .Include(t => t.TransportConversation)
                 .FirstOrDefaultAsync(t => t.TransportId == transportId);
         }
 
@@ -79,6 +81,7 @@ namespace DowiezPlBackend.Data
                 .Include(c => c.StartsIn)
                 .Include(c => c.EndsIn)
                 .Include(u => u.Creator)
+                .Include(t => t.TransportConversation)
                 .Include(d => d.Demands)
                 .ThenInclude(c => c.From)
                 .Include(d => d.Demands)

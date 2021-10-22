@@ -38,5 +38,8 @@ namespace DowiezPlBackend.Models
 
         [Required]
         public AppUser Creator { get; set; }
+
+        [ForeignKey("ConversationId")]
+        public Conversation TransportConversation { get; set; }
     }
 }

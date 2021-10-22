@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.Linq;
 using System.Threading.Tasks;
 using AutoMapper;
 using DowiezPlBackend.Data;
@@ -319,9 +320,10 @@ namespace DowiezPlBackend.Controllers
                 return Forbid();
             
             if (demandFromRepo.Status == DemandStatus.InProgress
+                || demandFromRepo.Status == DemandStatus.Accepted
                 || demandFromRepo.Status == DemandStatus.Finished)
             {
-                return BadRequest(new ErrorMessage("Cannot cancel a demand with status InProgress or Finished.", "DC_CaD_1"));
+                return BadRequest(new ErrorMessage("Cannot cancel a demand with status Accpeted, InProgress or Finished", "DC_CaD_1"));
             }
 
             if (demandFromRepo.Status == DemandStatus.Canceled)
@@ -408,6 +410,8 @@ namespace DowiezPlBackend.Controllers
             if (demandFromRepo.Status != DemandStatus.TransportProposed)
                 return BadRequest(new ErrorMessage("Only demand with status TransportProposed can accept proposition for transport.", "DC_AP_2"));
             
+            await _repository.AddUserToConversation(demandFromRepo.Creator, demandFromRepo.Transport.TransportConversation);
+
             demandFromRepo.Status = DemandStatus.Accepted;
             if (!await _repository.SaveChangesAsync())
                 return BadRequest(new ErrorMessage("Failed to accept proposition for a transport.", "DC_AP_3"));
@@ -474,6 +478,12 @@ namespace DowiezPlBackend.Controllers
                 return BadRequest(new ErrorMessage("Only demand with status Accepted can cancel transport.", "DC_CToD_2"));
             
             demandFromRepo.Status = DemandStatus.Created;
+            if ((await _repository.GetUserDemandsAsync(me.Id))
+                .Count(d => d.Transport.TransportId == demandFromRepo.Transport.TransportId) == 1)
+            {
+                await _repository.RemoveUserFromConversation(me, demandFromRepo.Transport.TransportConversation);
+            }
+
             demandFromRepo.Transport = null;
             if (!await _repository.SaveChangesAsync())
                 return BadRequest(new ErrorMessage("Failed to deny proposition for a transport.", "DC_CToD_3"));

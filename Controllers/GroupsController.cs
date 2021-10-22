@@ -93,6 +93,7 @@ namespace DowiezPlBackend.Controllers
             group.GroupConversation = conversation;
 
             _repository.CreateConversation(conversation);
+            await _repository.AddUserToConversation(me, conversation);
             _repository.CreateGroup(group);
             _repository.CreateMember(new Member() {
                 User = me,

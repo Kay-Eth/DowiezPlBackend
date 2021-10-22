@@ -161,6 +161,14 @@ namespace DowiezPlBackend.Controllers
             transport.StartsIn = cityStart;
             transport.EndsIn = cityEnd;
 
+            var conversation = new Conversation()
+            {
+                CreationDate = DateTime.UtcNow,
+                Category = ConversationCategory.Transport
+            };
+            _repository.CreateConversation(conversation);
+            await _repository.AddUserToConversation(me, conversation);
+            transport.TransportConversation = conversation;
             _repository.CreateTransport(transport);
 
             if (!await _repository.SaveChangesAsync())
@@ -246,6 +254,8 @@ namespace DowiezPlBackend.Controllers
                 return BadRequest(new ErrorMessage("Cannot cancel a transport with status other than Declared.", "TC_CaT_2"));
             
             transportFromRepo.Status = TransportStatus.Canceled;
+            _repository.DeleteConversation(transportFromRepo.TransportConversation);
+            transportFromRepo.TransportConversation = null;
 
             var demands = transportFromRepo.Demands;
             foreach (var demand in demands)
@@ -322,6 +332,8 @@ namespace DowiezPlBackend.Controllers
 
             if (demandFromRepo.Status != DemandStatus.TransportRequested)
                 return BadRequest(new ErrorMessage("Only demand with status TransportRequested can be accepted.", "TC_AToD_5"));
+            
+            await _repository.AddUserToConversation(demandFromRepo.Creator, transportFromRepo.TransportConversation);
 
             demandFromRepo.Status = DemandStatus.Accepted;
             if (!await _repository.SaveChangesAsync())
@@ -492,6 +504,9 @@ namespace DowiezPlBackend.Controllers
             {
                 demand.Status = DemandStatus.Finished;
             }
+
+            _repository.DeleteConversation(transportFromRepo.TransportConversation);
+            transportFromRepo.TransportConversation = null;
 
             if (!await _repository.SaveChangesAsync())
                 return BadRequest(new ErrorMessage("Failed to finish a transport.", "TC_FT_3"));

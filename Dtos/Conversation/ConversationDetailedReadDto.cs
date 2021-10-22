@@ -1,13 +1,14 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using DowiezPlBackend.Dtos.Account;
 using DowiezPlBackend.Enums;
 
-namespace DowiezPlBackend.Models
+namespace DowiezPlBackend.Dtos.Conversation
 {
-    public class Conversation
+    public class ConversationDetailedReadDto
     {
-        [Key]
+        [Required]
         public Guid ConversationId { get; set; }
 
         [Required]
@@ -16,10 +17,7 @@ namespace DowiezPlBackend.Models
         [Required]
         public ConversationCategory Category { get; set; }
 
-        public Group OwnerGroup { get; set; }
-        public Transport OwnerTransport { get; set; }
-
-        public ICollection<Message> Messages { get; set; }
-        public ICollection<Participant> Participants { get; set; }
+        [Required]
+        public ICollection<AccountLimitedReadDto> ChatMembers { get; set; }
     }
 }

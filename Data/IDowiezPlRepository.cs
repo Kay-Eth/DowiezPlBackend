@@ -75,6 +75,11 @@ namespace DowiezPlBackend.Data
 
         void CreateConversation(Conversation conversation);
         void DeleteConversation(Conversation conversation);
+        Task<Conversation> GetConversation(Guid conversationId);
+        Task<List<Conversation>> GetUserConversationsAsync(Guid userId);
+
+        Task AddUserToConversation(AppUser user, Conversation conversation);
+        Task RemoveUserFromConversation(AppUser user, Conversation conversation);
 
         Task<int> CountOfNewDemands(DateTime before);
         Task<int> CountOfNewOpinions(DateTime before);
