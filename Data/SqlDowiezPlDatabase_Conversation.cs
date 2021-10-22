@@ -30,6 +30,7 @@ namespace DowiezPlBackend.Data
             return await _context.Conversations.AsNoTracking()
                 .Include(c => c.Participants)
                 .ThenInclude(p => p.User)
+                .Include(c => c.Messages)
                 .FirstOrDefaultAsync(c => c.ConversationId == conversationId);
         }
 
