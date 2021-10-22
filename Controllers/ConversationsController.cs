@@ -61,7 +61,6 @@ namespace DowiezPlBackend.Controllers
             else if (conversation.Category == ConversationCategory.Transport)
             {
                 result.Name = conversation.OwnerTransport.Creator.LastName + ", " + conversation.OwnerTransport.Creator.FirstName;
-                Console.WriteLine(result.Name);
             }
             
             return Ok(result);
