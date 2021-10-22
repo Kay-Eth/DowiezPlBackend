@@ -2,7 +2,9 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using DowiezPlBackend.Dtos.Account;
+using DowiezPlBackend.Dtos.Group;
 using DowiezPlBackend.Dtos.Message;
+using DowiezPlBackend.Dtos.Transport;
 using DowiezPlBackend.Enums;
 
 namespace DowiezPlBackend.Dtos.Conversation
@@ -23,5 +25,8 @@ namespace DowiezPlBackend.Dtos.Conversation
 
         [Required]
         public MessageReadDto LastMessage { get; set; }
+
+        public TransportSimpleReadDto OwnerTransport { get; set; }
+        public GroupReadDto OwnerGroup { get; set; }
     }
 }
