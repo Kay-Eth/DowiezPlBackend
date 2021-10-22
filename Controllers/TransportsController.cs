@@ -312,7 +312,7 @@ namespace DowiezPlBackend.Controllers
         public async Task<ActionResult> AcceptTransportOfDemand(Guid transportId, Guid demandId)
         {
             var me = await GetMyUserAsync();
-            var transportFromRepo = await _repository.GetTransportNotTrackedAsync(transportId);
+            var transportFromRepo = await _repository.GetTransportAsync(transportId);
 
             if (transportFromRepo == null)
                 return NotFound(new ErrorMessage("Transport not found.", "TC_AToD_1"));
