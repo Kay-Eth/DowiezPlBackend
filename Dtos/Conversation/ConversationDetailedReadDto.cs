@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using DowiezPlBackend.Dtos.Account;
+using DowiezPlBackend.Dtos.Message;
 using DowiezPlBackend.Enums;
 
 namespace DowiezPlBackend.Dtos.Conversation
@@ -19,5 +20,8 @@ namespace DowiezPlBackend.Dtos.Conversation
 
         [Required]
         public ICollection<AccountLimitedReadDto> ChatMembers { get; set; }
+
+        [Required]
+        public MessageReadDto LastMessage { get; set; }
     }
 }

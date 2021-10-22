@@ -12,7 +12,9 @@ namespace DowiezPlBackend.Profiles
             CreateMap<Conversation, ConversationReadDto>();
             CreateMap<Conversation, ConversationDetailedReadDto>()
                 .ForMember(dest => dest.ChatMembers,
-                    opts => opts.MapFrom(src => src.Participants.Select(p => p.User)));
+                    opts => opts.MapFrom(src => src.Participants.Select(p => p.User)))
+                .ForMember(dest => dest.LastMessage,
+                    opts => opts.MapFrom(src => src.Messages.Last()));
         }
     }
 }
