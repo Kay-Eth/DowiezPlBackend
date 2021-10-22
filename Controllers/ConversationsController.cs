@@ -64,7 +64,7 @@ namespace DowiezPlBackend.Controllers
                 Console.WriteLine(result.Name);
             }
             
-            return Ok(_mapper.Map<ConversationDetailedReadDto>(conversation));
+            return Ok(result);
         }
 
         [HttpGet("user/{userId}")]
