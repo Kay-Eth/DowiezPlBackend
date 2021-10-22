@@ -23,6 +23,9 @@ namespace DowiezPlBackend.Dtos.Conversation
         [Required]
         public ICollection<AccountLimitedReadDto> ChatMembers { get; set; }
 
+        [Required]
+        public string Name { get; set; }
+
         public MessageReadDto LastMessage { get; set; }
 
         public TransportSimpleReadDto OwnerTransport { get; set; }

@@ -36,9 +36,32 @@ namespace DowiezPlBackend.Controllers
         [HttpGet("{conversationId}", Name = "GetConversationDetails")]
         public async Task<ActionResult<ConversationDetailedReadDto>> GetConversationDetails(Guid conversationId)
         {
+            var me = await GetMyUserAsync();
+
             var conversation = await _repository.GetConversation(conversationId);
             if (conversation == null)
                 return NotFound();
+            
+            var result = _mapper.Map<ConversationDetailedReadDto>(conversation);
+            if (conversation.Category == ConversationCategory.Normal)
+            {
+                foreach (var part in conversation.Participants)
+                {
+                    if (part.User.Id != me.Id)
+                    {
+                        result.Name = part.User.FirstName + part.User.LastName;
+                        break;
+                    }
+                }
+            }
+            else if (conversation.Category == ConversationCategory.Group)
+            {
+                result.Name = conversation.OwnerGroup.Name;
+            }
+            else if (conversation.Category == ConversationCategory.Transport)
+            {
+                result.Name = conversation.OwnerTransport.Creator.LastName + ", " + conversation.OwnerTransport.Creator.FirstName;
+            }
             
             return Ok(_mapper.Map<ConversationDetailedReadDto>(conversation));
         }
