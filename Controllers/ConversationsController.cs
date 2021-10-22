@@ -28,7 +28,7 @@ namespace DowiezPlBackend.Controllers
         public async Task<ActionResult<IEnumerable<ConversationReadDto>>> GetMyConversations()
         {
             var me = await GetMyUserAsync();
-            var result = _repository.GetUserConversationsAsync(me.Id);
+            var result = await _repository.GetUserConversationsAsync(me.Id);
 
             return Ok(_mapper.Map<IEnumerable<ConversationReadDto>>(result));
         }
