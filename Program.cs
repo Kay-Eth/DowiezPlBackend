@@ -81,7 +81,7 @@ namespace DowiezPlBackend
                             var pfxPassword = "DowiezPl1234@"; 
 
                             options.Listen(IPAddress.Any, port, listenOptions => {
-                                listenOptions.Protocols = HttpProtocols.Http1AndHttp2AndHttp3;
+                                listenOptions.Protocols = HttpProtocols.Http1AndHttp2;
                                 listenOptions.UseHttps(pfxFilePath, pfxPassword);
                             });
                         });
