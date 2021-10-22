@@ -89,7 +89,7 @@ namespace DowiezPlBackend
                         webBuilder.UseStartup<Startup>();
                     });
             }
-            else if (environment == "VPS_test")
+            else if (environment == "VPSTest")
             {
                 return Host.CreateDefaultBuilder(args)
                     .ConfigureWebHostDefaults(webBuilder =>

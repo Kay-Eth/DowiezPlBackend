@@ -47,14 +47,14 @@
         "ASPNETCORE_ENVIRONMENT": "VPS"
       }
     },
-    "DowiezPlBackend_VPS_test": {
+    "DowiezPlBackend_VPSTest": {
       "commandName": "Project",
       "dotnetRunMessages": "true",
       "launchBrowser": true,
       "launchUrl": "swagger",
       "applicationUrl": "https://dowiez.pl:7001",
       "environmentVariables": {
-        "ASPNETCORE_ENVIRONMENT": "VPS"
+        "ASPNETCORE_ENVIRONMENT": "VPSTest"
       }
     }
   }
