@@ -89,6 +89,30 @@ namespace DowiezPlBackend
                         webBuilder.UseStartup<Startup>();
                     });
             }
+            else if (environment == "VPS_test")
+            {
+                return Host.CreateDefaultBuilder(args)
+                    .ConfigureWebHostDefaults(webBuilder =>
+                    {
+                        webBuilder.ConfigureKestrel(options => {
+                            options.ConfigureHttpsDefaults(co =>
+                            {
+                                co.SslProtocols = SslProtocols.Tls | SslProtocols.Tls11 | SslProtocols.Tls12;
+                            });
+
+                            var port = 7001;
+                            var pfxFilePath = "/home/kayeth/DowiezPlBackendUpdate/certificate.pfx";
+                            var pfxPassword = "DowiezPl1234@"; 
+
+                            options.Listen(IPAddress.Any, port, listenOptions => {
+                                listenOptions.Protocols = HttpProtocols.Http1AndHttp2;
+                                listenOptions.UseHttps(pfxFilePath, pfxPassword);
+                            });
+                        });
+
+                        webBuilder.UseStartup<Startup>();
+                    });
+            }
             else
             {
                 return Host.CreateDefaultBuilder(args)

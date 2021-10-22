@@ -42,7 +42,17 @@
       "dotnetRunMessages": "true",
       "launchBrowser": true,
       "launchUrl": "swagger",
-      "applicationUrl": "https://dowiez.pl:5001;http://dowiez.pl:5000",
+      "applicationUrl": "https://dowiez.pl:5001",
+      "environmentVariables": {
+        "ASPNETCORE_ENVIRONMENT": "VPS"
+      }
+    },
+    "DowiezPlBackend_VPS_test": {
+      "commandName": "Project",
+      "dotnetRunMessages": "true",
+      "launchBrowser": true,
+      "launchUrl": "swagger",
+      "applicationUrl": "https://dowiez.pl:7001",
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "VPS"
       }
