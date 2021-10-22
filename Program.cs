@@ -73,7 +73,7 @@ namespace DowiezPlBackend
                         webBuilder.ConfigureKestrel(options => {
                             options.ConfigureHttpsDefaults(co =>
                             {
-                                co.SslProtocols = SslProtocols.Tls | SslProtocols.Tls11 | SslProtocols.Tls12;
+                                co.SslProtocols = SslProtocols.Tls | SslProtocols.Tls11 | SslProtocols.Tls12 | SslProtocols.Tls13;
                             });
 
                             var port = 5001;
@@ -81,7 +81,7 @@ namespace DowiezPlBackend
                             var pfxPassword = "DowiezPl1234@"; 
 
                             options.Listen(IPAddress.Any, port, listenOptions => {
-                                listenOptions.Protocols = HttpProtocols.Http1AndHttp2;
+                                listenOptions.Protocols = HttpProtocols.Http1AndHttp2AndHttp3;
                                 listenOptions.UseHttps(pfxFilePath, pfxPassword);
                             });
                         });
