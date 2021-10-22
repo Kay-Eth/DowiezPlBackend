@@ -49,7 +49,7 @@ namespace DowiezPlBackend.Controllers
                 {
                     if (part.User.Id != me.Id)
                     {
-                        result.Name = part.User.FirstName + part.User.LastName;
+                        result.Name = part.User.FirstName + " " + part.User.LastName;
                         break;
                     }
                 }
