@@ -31,6 +31,7 @@ namespace DowiezPlBackend.Data
                 .Include(c => c.Participants)
                 .ThenInclude(p => p.User)
                 .Include(c => c.Messages)
+                .ThenInclude(m => m.Sender)
                 .FirstOrDefaultAsync(c => c.ConversationId == conversationId);
         }
 
