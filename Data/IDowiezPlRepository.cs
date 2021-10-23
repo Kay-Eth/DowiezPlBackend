@@ -81,6 +81,8 @@ namespace DowiezPlBackend.Data
         Task AddUserToConversation(AppUser user, Conversation conversation);
         Task RemoveUserFromConversation(AppUser user, Conversation conversation);
 
+        Task<List<Message>> GetMessagesFromConversation(Guid conversationId);
+
         Task<int> CountOfNewDemands(DateTime before);
         Task<int> CountOfNewOpinions(DateTime before);
         Task<int> CountOfNewTransports(DateTime before);

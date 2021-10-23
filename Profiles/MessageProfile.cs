@@ -9,6 +9,9 @@ namespace DowiezPlBackend.Profiles
         public MessageProfile()
         {
             CreateMap<Message, MessageReadDto>();
+            CreateMap<Message, MessageSimpleReadDto>()
+                .ForMember(dest => dest.SenderId,
+                    opts => opts.MapFrom(src => src.Sender.Id));
         }
     }
 }

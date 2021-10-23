@@ -32,6 +32,11 @@ namespace DowiezPlBackend.Hubs
                 .SingleAsync(x => x.UserName == Context.User.Identity.Name);
         }
 
+        private async Task<string> GetMyUserIdAsync()
+        {
+            return (await _context.Users.SingleAsync(x => x.UserName == Context.User.Identity.Name)).Id.ToString();
+        }
+
         // public async Task SendMessage(string message)
         // {
         //     Console.WriteLine("Name:" + Context.User.Identity.Name);
@@ -42,7 +47,7 @@ namespace DowiezPlBackend.Hubs
 
         public async Task SendToConversation(string conversationId, string message)
         {
-            await Clients.Group(conversationId).SendAsync("Send", message);
+            await Clients.Group(conversationId).SendAsync("Send", conversationId, await GetMyUserIdAsync(), message);
         }
 
         // public async Task AddToGroup(string groupName)
