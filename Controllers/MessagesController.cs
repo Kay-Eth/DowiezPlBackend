@@ -27,5 +27,12 @@ namespace DowiezPlBackend.Controllers
             var result = await _repository.GetMessagesFromConversation(conversationId);
             return Ok(_mapper.Map<IEnumerable<MessageSimpleReadDto>>(result));
         }
+
+        [HttpGet("conversation/{conversationId}/last")]
+        public async Task<ActionResult<IEnumerable<MessageSimpleReadDto>>> GetLastFromConversation(Guid conversationId)
+        {
+            var result = await _repository.GetMessagesFromConversation(conversationId);
+            return Ok(_mapper.Map<IEnumerable<MessageSimpleReadDto>>(result));
+        }
     }
 }

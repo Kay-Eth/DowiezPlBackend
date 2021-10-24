@@ -15,6 +15,18 @@ namespace DowiezPlBackend.Data
                 .Include(m => m.Conversation)
                 .Include(m => m.Sender)
                 .Where(m => m.Conversation.ConversationId == conversationId)
+                .OrderBy(m => m.SentDate)
+                .ToListAsync();
+        }
+
+        public async Task<List<Message>> GetLastMessagesFromConversation(Guid conversationId, int count)
+        {
+            return await _context.Messages.AsNoTracking()
+                .Include(m => m.Conversation)
+                .Include(m => m.Sender)
+                .Where(m => m.Conversation.ConversationId == conversationId)
+                .OrderBy(m => m.SentDate)
+                .TakeLast(count)
                 .ToListAsync();
         }
     }
