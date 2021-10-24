@@ -82,6 +82,7 @@ namespace DowiezPlBackend.Data
         Task RemoveUserFromConversation(AppUser user, Conversation conversation);
 
         Task<List<Message>> GetMessagesFromConversation(Guid conversationId);
+        Task<List<Message>> GetMessagesAfterFromConversation(Guid conversationId, Guid messageId);
         Task<List<Message>> GetLastMessagesFromConversation(Guid conversationId, int count);
 
         Task<int> CountOfNewDemands(DateTime before);

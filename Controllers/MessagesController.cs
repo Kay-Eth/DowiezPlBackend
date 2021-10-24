@@ -31,7 +31,16 @@ namespace DowiezPlBackend.Controllers
         [HttpGet("conversation/{conversationId}/last")]
         public async Task<ActionResult<IEnumerable<MessageSimpleReadDto>>> GetLastFromConversation(Guid conversationId)
         {
-            var result = await _repository.GetMessagesFromConversation(conversationId);
+            var result = await _repository.GetLastMessagesFromConversation(conversationId, 10);
+            return Ok(_mapper.Map<IEnumerable<MessageSimpleReadDto>>(result));
+        }
+
+        [HttpGet("conversation/{conversationId}/after/{messageId}")]
+        public async Task<ActionResult<IEnumerable<MessageSimpleReadDto>>> GetAfterFromConversation(Guid conversationId, Guid messageId)
+        {
+            var result = await _repository.GetMessagesAfterFromConversation(conversationId, messageId);
+            if (result == null)
+                return NotFound();
             return Ok(_mapper.Map<IEnumerable<MessageSimpleReadDto>>(result));
         }
     }
