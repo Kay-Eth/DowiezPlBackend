@@ -25,8 +25,8 @@ namespace DowiezPlBackend.Data
                 .Include(m => m.Conversation)
                 .Include(m => m.Sender)
                 .Where(m => m.Conversation.ConversationId == conversationId)
-                .OrderBy(m => m.SentDate)
-                .TakeLast(count)
+                .OrderByDescending(m => m.SentDate)
+                .Take(count).Reverse()
                 .ToListAsync();
         }
 
