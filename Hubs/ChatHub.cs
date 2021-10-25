@@ -37,32 +37,19 @@ namespace DowiezPlBackend.Hubs
             return (await _context.Users.SingleAsync(x => x.UserName == Context.User.Identity.Name)).Id.ToString();
         }
 
-        // public async Task SendMessage(string message)
-        // {
-        //     Console.WriteLine("Name:" + Context.User.Identity.Name);
-        //     var me = await GetMyUserAsync();
-            
-        //     await Clients.All.SendAsync("ReceiveMessage", me.Id.ToString(), message);
-        // }
-
         public async Task SendToConversation(string conversationId, string message)
         {
-            await Clients.Group(conversationId).SendAsync("Send", conversationId, await GetMyUserIdAsync(), message);
+            var messageEntity = new Message()
+            {
+                Content = message,
+                Sender = await GetMyUserAsync(),
+                Conversation = await _context.Conversations.FirstOrDefaultAsync(c => c.ConversationId.ToString() == conversationId),
+                SentDate = DateTime.UtcNow
+            };
+            _context.Messages.Add(messageEntity);
+            await _context.SaveChangesAsync();
+            await Clients.Group(conversationId).SendAsync("Send", conversationId, await GetMyUserIdAsync(), messageEntity.MessageId, message);
         }
-
-        // public async Task AddToGroup(string groupName)
-        // {
-        //     await Groups.AddToGroupAsync(Context.ConnectionId, groupName);
-
-        //     await Clients.Group(groupName).SendAsync("Send", $"{Context.ConnectionId} has joined the group {groupName}.");
-        // }
-
-        // public async Task RemoveFromGroup(string groupName)
-        // {
-        //     await Groups.RemoveFromGroupAsync(Context.ConnectionId, groupName);
-
-        //     await Clients.Group(groupName).SendAsync("Send", $"{Context.ConnectionId} has left the group {groupName}.");
-        // }
 
         public override async Task OnConnectedAsync()
         {
