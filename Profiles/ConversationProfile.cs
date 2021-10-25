@@ -15,6 +15,9 @@ namespace DowiezPlBackend.Profiles
                     opts => opts.MapFrom(src => src.Participants.Select(p => p.User)))
                 .ForMember(dest => dest.LastMessage,
                     opts => opts.MapFrom(src => src.Messages.Count > 0 ? src.Messages.OrderBy(m => m.SentDate).Last() : null));
+            CreateMap<Conversation, ConversationSmallDetailReadDto>()
+                .ForMember(dest => dest.LastMessage,
+                    opts => opts.MapFrom(src => src.Messages.Count > 0 ? src.Messages.OrderBy(m => m.SentDate).Last() : null));
         }
     }
 }

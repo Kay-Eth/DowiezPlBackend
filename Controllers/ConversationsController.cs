@@ -33,6 +33,39 @@ namespace DowiezPlBackend.Controllers
             return Ok(_mapper.Map<IEnumerable<ConversationReadDto>>(result));
         }
 
+        [HttpGet("{conversationId}/small")]
+        public async Task<ActionResult<ConversationSmallDetailReadDto>> GetConversationSmallDetails(Guid conversationId)
+        {
+            var me = await GetMyUserAsync();
+
+            var conversation = await _repository.GetConversation(conversationId);
+            if (conversation == null)
+                return NotFound();
+            
+            var result = _mapper.Map<ConversationSmallDetailReadDto>(conversation);
+            if (conversation.Category == ConversationCategory.Normal)
+            {
+                foreach (var part in conversation.Participants)
+                {
+                    if (part.User.Id != me.Id)
+                    {
+                        result.Name = part.User.FirstName + " " + part.User.LastName;
+                        break;
+                    }
+                }
+            }
+            else if (conversation.Category == ConversationCategory.Group)
+            {
+                result.Name = conversation.OwnerGroup.Name;
+            }
+            else if (conversation.Category == ConversationCategory.Transport)
+            {
+                result.Name = conversation.OwnerTransport.Creator.LastName + ", " + conversation.OwnerTransport.Creator.FirstName;
+            }
+            
+            return Ok(result);
+        }
+
         [HttpGet("{conversationId}", Name = "GetConversationDetails")]
         public async Task<ActionResult<ConversationDetailedReadDto>> GetConversationDetails(Guid conversationId)
         {
