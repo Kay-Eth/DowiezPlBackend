@@ -43,7 +43,7 @@ namespace DowiezPlBackend.Controllers
             var result = new ReportsCountsStatsDto();
             result.UserCount = reports.Count(r => r.Category == ReportCategory.User);
             result.TransportCount = reports.Count(r => r.Category == ReportCategory.Transport);
-            result.DemandsCount = reports.Count(r => r.Category == ReportCategory.Demand);
+            result.DemandCount = reports.Count(r => r.Category == ReportCategory.Demand);
             result.GroupCount = reports.Count(r => r.Category == ReportCategory.Group);
             result.TechnicalCount = reports.Count(r => r.Category == ReportCategory.Technical);
 
