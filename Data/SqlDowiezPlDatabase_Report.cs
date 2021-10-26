@@ -27,7 +27,11 @@ namespace DowiezPlBackend.Data
                 .ToListAsync();
         }
 
-        public async Task<List<Report>> GetReportsFilterAsync(ReportCategory? category, ReportStatus? status, AppUser assignedTo)
+        public async Task<List<Report>> GetReportsFilterAsync(
+            ReportCategory? category,
+            ReportStatus? status,
+            bool? isAssigned,
+            AppUser assignedTo)
         {
             return await _context.Reports.AsNoTracking()
                 .Include(r => r.Reported)
@@ -35,6 +39,7 @@ namespace DowiezPlBackend.Data
                 .Include(r => r.Operator)
                 .Where(r => category == null ? true : r.Category == category)
                 .Where(r => status == null ? true : r.Status == status)
+                .Where(r => isAssigned == null ? true : (r.Operator != null) == (bool)isAssigned)
                 .Where(r => assignedTo == null ? true : r.Operator.Id == assignedTo.Id)
                 .ToListAsync();
         }

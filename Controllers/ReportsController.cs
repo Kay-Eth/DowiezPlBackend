@@ -36,11 +36,16 @@ namespace DowiezPlBackend.Controllers
         public async Task<ActionResult<IEnumerable<ReportSimpleReadDto>>> GetReports(
             ReportCategory? category,
             ReportStatus? status,
+            bool? isAssigned,
             bool? assignedToMe
         )
         {
             var me = await GetMyUserAsync();
-            var results = await _repository.GetReportsFilterAsync(category, status, assignedToMe == null ? null : ((bool)assignedToMe ? me : null));
+            var results = await _repository.GetReportsFilterAsync(
+                category,
+                status,
+                isAssigned == null ? null : (bool)isAssigned,
+                assignedToMe == null ? null : ((bool)assignedToMe ? me : null));
             return Ok(_mapper.Map<IEnumerable<ReportSimpleReadDto>>(results));
         }
         
