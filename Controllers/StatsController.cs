@@ -41,10 +41,11 @@ namespace DowiezPlBackend.Controllers
             var reports = await _repository.GetIssuedReportsAsync();
 
             var result = new ReportsCountsStatsDto();
-            result.OpinionCount = reports.Count(r => r.Category == ReportCategory.Opinion);
-            result.PackageCount = reports.Count(r => r.Category == ReportCategory.Package);
-            result.TechnicalCount = reports.Count(r => r.Category == ReportCategory.Technical);
             result.UserCount = reports.Count(r => r.Category == ReportCategory.User);
+            result.TransportCount = reports.Count(r => r.Category == ReportCategory.Transport);
+            result.DemandsCount = reports.Count(r => r.Category == ReportCategory.Demand);
+            result.GroupCount = reports.Count(r => r.Category == ReportCategory.Group);
+            result.TechnicalCount = reports.Count(r => r.Category == ReportCategory.Technical);
 
             return Ok(result);
         }

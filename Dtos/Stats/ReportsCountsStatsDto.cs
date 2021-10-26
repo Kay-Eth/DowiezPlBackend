@@ -5,12 +5,14 @@ namespace DowiezPlBackend.Dtos.Stats
     public class ReportsCountsStatsDto
     {
         [Required]
-        public int PackageCount { get; set; }
-        [Required]
         public int UserCount { get; set; }
         [Required]
-        public int TechnicalCount { get; set; }
+        public int TransportCount { get; set; }
         [Required]
-        public int OpinionCount { get; set; }
+        public int DemandCount { get; set; }
+        [Required]
+        public int GroupCount { get; set; }
+        [Required]
+        public int TechnicalCount { get; set; }
     }
 }
