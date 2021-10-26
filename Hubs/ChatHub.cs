@@ -48,7 +48,8 @@ namespace DowiezPlBackend.Hubs
             };
             _context.Messages.Add(messageEntity);
             await _context.SaveChangesAsync();
-            await Clients.Group(conversationId).SendAsync("Send", conversationId, await GetMyUserIdAsync(), messageEntity.MessageId, message);
+            await Clients.Group(conversationId).SendAsync("Send", conversationId, messageEntity.Sender.Id, messageEntity.MessageId, messageEntity.SentDate, message);
+            await Clients.Caller.SendAsync("Send", conversationId, messageEntity.Sender.Id, messageEntity.MessageId, messageEntity.SentDate, message);
         }
 
         public override async Task OnConnectedAsync()
