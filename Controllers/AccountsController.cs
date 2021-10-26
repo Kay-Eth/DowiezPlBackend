@@ -129,6 +129,25 @@ namespace DowiezPlBackend.Controllers
         }
 
         /// <summary>
+        /// Returns account's basic information
+        /// </summary>
+        /// <response code="200">Returns object with user data</response>
+        /// <response code="400">Cannot retrieve information about moderator accounts</response>
+        /// <response code="403">Only moderators can do it</response>
+        /// <response code="404">Account not found</response>
+        [HttpGet("{userId}/small")]
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        public async Task<ActionResult<AccountLimitedReadDto>> GetUserAccountSmall(Guid userId)
+        {
+            var user = await _userManager.FindByIdAsync(userId.ToString());
+            if (user == null)
+                return NotFound();
+            
+            return Ok(_mapper.Map<AccountLimitedReadDto>(user));
+        }
+
+        /// <summary>
         /// Creates user with "Standard" role and sends confirmation email
         /// </summary>
         /// <param name="accountCreateDto">Object with information about new user</param>

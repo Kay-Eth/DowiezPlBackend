@@ -49,7 +49,13 @@ namespace DowiezPlBackend.Hubs
             _context.Messages.Add(messageEntity);
             await _context.SaveChangesAsync();
             await Clients.Group(conversationId).SendAsync("Send", conversationId, messageEntity.Sender.Id, messageEntity.MessageId, messageEntity.SentDate, message);
-            await Clients.Caller.SendAsync("Send", conversationId, messageEntity.Sender.Id, messageEntity.MessageId, messageEntity.SentDate, message);
+            // await Clients.Caller.SendAsync("Send", conversationId, messageEntity.Sender.Id, messageEntity.MessageId, messageEntity.SentDate, message);
+        }
+
+        public async Task NotifyChatJoin(string conversationId, Guid accountId)
+        {
+            var user = await _context.Users.FirstOrDefaultAsync(u => u.Id == accountId);
+            await Clients.Group(conversationId).SendAsync("GroupJoin", conversationId, accountId.ToString());
         }
 
         public override async Task OnConnectedAsync()
