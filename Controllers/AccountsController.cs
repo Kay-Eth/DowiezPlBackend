@@ -290,12 +290,13 @@ namespace DowiezPlBackend.Controllers
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<ActionResult> BanUser(string userId, bool status)
         {
+            var me = await _userManager.FindByNameAsync(HttpContext.User.Identity.Name);
             var user = await _userManager.FindByIdAsync(userId);
             if (user == null)
                 return NotFound(new ErrorMessage($"User with id {userId} not found."));
             if (status && !user.Banned)
             {
-                
+                await _mailService.SendBannedAsync(user.Email, me.Email, me.FirstName + " " + me.LastName, me.Id.ToString());
             }
 
             user.Banned = status;

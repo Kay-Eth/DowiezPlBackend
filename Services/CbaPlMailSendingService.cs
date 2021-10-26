@@ -17,11 +17,6 @@ namespace DowiezPlBackend.Services
             _mailSettings = mailSettings.Value;
         }
 
-        public Task SendBannedAsync(string emailAddress, string moderatorEmailAddress, string moderatorName, string moderatorId)
-        {
-            return null;
-        }
-
         public async Task SendEmailAsync(MimeMessage message)
         {
             using var smtp = new SmtpClient();
@@ -65,6 +60,28 @@ namespace DowiezPlBackend.Services
 
             var builder = new BodyBuilder();
             builder.HtmlBody = text.Replace("[USERID]", userId).Replace("[TOKEN]", token);
+            message.Body = builder.ToMessageBody();
+
+            await SendEmailAsync(message);
+        }
+
+        public async Task SendBannedAsync(string emailAddress, string moderatorEmailAddress, string moderatorName, string moderatorId)
+        {
+            var message = new MimeMessage();
+            message.From.Add(new MailboxAddress(_mailSettings.DisplayName, _mailSettings.Mail));
+            message.To.Add(MailboxAddress.Parse(emailAddress));
+            message.Subject = "Potwierdzenie adresu Email";
+
+            string filePath = Directory.GetCurrentDirectory() + "/Templates/BannedTemplate.html";
+            StreamReader str = new StreamReader(filePath);
+            string text = await str.ReadToEndAsync();
+            str.Close();
+
+            var builder = new BodyBuilder();
+            builder.HtmlBody = text
+                .Replace("[NAME]", moderatorName)
+                .Replace("[EMAIL]", moderatorEmailAddress)
+                .Replace("[ID]", moderatorId);
             message.Body = builder.ToMessageBody();
 
             await SendEmailAsync(message);
