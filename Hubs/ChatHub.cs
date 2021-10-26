@@ -49,13 +49,27 @@ namespace DowiezPlBackend.Hubs
             _context.Messages.Add(messageEntity);
             await _context.SaveChangesAsync();
             await Clients.Group(conversationId).SendAsync("Send", conversationId, messageEntity.Sender.Id, messageEntity.MessageId, messageEntity.SentDate, message);
-            // await Clients.Caller.SendAsync("Send", conversationId, messageEntity.Sender.Id, messageEntity.MessageId, messageEntity.SentDate, message);
+        }
+
+        public async Task NotifyNewConv(string conversationId, Guid accountId)
+        {
+            var me = await GetMyUserAsync();
+            await NotifyChatJoin(conversationId, accountId);
+            foreach (var connection in me.Connections)
+            {
+                await Clients.Client(connection.ConnectionId).SendAsync("NewConv", conversationId);
+                await Groups.AddToGroupAsync(connection.ConnectionId, conversationId);
+            }
         }
 
         public async Task NotifyChatJoin(string conversationId, Guid accountId)
         {
-            var user = await _context.Users.FirstOrDefaultAsync(u => u.Id == accountId);
-            await Clients.Group(conversationId).SendAsync("GroupJoin", conversationId, accountId.ToString());
+            await Clients.Group(conversationId).SendAsync("ConvJoined", conversationId, accountId.ToString());
+        }
+
+        public async Task NotifyChatLeave(string conversationId, Guid accountId)
+        {
+            await Clients.Group(conversationId).SendAsync("ConvLeft", conversationId, accountId.ToString());
         }
 
         public override async Task OnConnectedAsync()
