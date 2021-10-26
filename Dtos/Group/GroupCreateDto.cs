@@ -12,5 +12,9 @@ namespace DowiezPlBackend.Dtos.Group
 
         [MaxLength(2000)]
         public string Description { get; set; }
+
+        [MaxLength(256)]
+        [MinLength(4)]
+        public string GroupPassword { get; set; }
     }
 }

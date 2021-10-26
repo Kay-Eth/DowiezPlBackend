@@ -129,8 +129,12 @@ namespace DowiezPlBackend.Controllers
 
             if (groupFromRepo.Creator.Id != me.Id)
                 return Forbid();
+
+            var pass = groupFromRepo.GroupPassword;
             
             _mapper.Map(groupUpdateDto, groupFromRepo);
+            if (groupUpdateDto.GroupPassword == null)
+                groupFromRepo.GroupPassword = pass;
 
             if (!await _repository.SaveChangesAsync())
                 return BadRequest(new ErrorMessage("Failed to update a group.", "GC_UG_1"));
@@ -176,13 +180,14 @@ namespace DowiezPlBackend.Controllers
         /// Allows a user to join a group
         /// </summary>
         /// <param name="groupId">Group's Id</param>
+        /// <param name="password">Group's password</param>
         /// <response code="204">Joined group successfully</response>
         /// <response code="400">Joining a group failed</response>
         /// <response code="404">Group not found</response>
         [HttpPost("{groupId}/join")]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(typeof(ErrorMessage), StatusCodes.Status400BadRequest)]
-        public async Task<ActionResult> JoinGroup(Guid groupId)
+        public async Task<ActionResult> JoinGroup(Guid groupId, [FromQuery] string password)
         {
             var groupFromRepo = await _repository.GetGroupAsync(groupId);
             if (groupFromRepo == null)
@@ -192,6 +197,11 @@ namespace DowiezPlBackend.Controllers
 
             if (await _repository.IsUserAMemberOfAGroup(me.Id, groupFromRepo.GroupId))
                 return BadRequest(new ErrorMessage("You are already member of this group.", "GC_JG_1"));
+
+            if (groupFromRepo.GroupPassword != password)
+            {
+                return BadRequest(new ErrorMessage("Group password incorrect.", "GC_JG_2"));
+            }
             
             _repository.CreateMember(new Member() {
                 User = me,
@@ -199,7 +209,7 @@ namespace DowiezPlBackend.Controllers
             });
 
             if (!await _repository.SaveChangesAsync())
-                return BadRequest(new ErrorMessage("Failed to join a group.", "GC_JG_2"));
+                return BadRequest(new ErrorMessage("Failed to join a group.", "GC_JG_3"));
             
             return NoContent();
         }

@@ -99,6 +99,7 @@ namespace DowiezPlBackend.Controllers
         /// <param name="reportCreateDto">New report's data</param>
         /// <response code="201">Report was created successfully</response>
         /// <response code="400">Creation of a report failed</response>
+        /// <response code="404">Some not found</response>
         [HttpPost]
         [ProducesResponseType(StatusCodes.Status201Created)]
         [ProducesResponseType(typeof(ErrorMessage), StatusCodes.Status400BadRequest)]
@@ -106,6 +107,10 @@ namespace DowiezPlBackend.Controllers
         {
             var issuer = await GetMyUserAsync();
             AppUser reported = null;
+            Transport reportedTransport = null;
+            Demand reportedDemand = null;
+            Group reportedGroup = null;
+
             if (reportCreateDto.ReportedId != null)
             {
                 var user = await GetUserAsync(reportCreateDto.ReportedId.ToString());
@@ -116,15 +121,40 @@ namespace DowiezPlBackend.Controllers
                 reported = user;
             }
 
+            if (reportCreateDto.ReportedTransportId != null)
+            {
+                reportedTransport = await _repository.GetTransportAsync((Guid)reportCreateDto.ReportedTransportId);
+                if (reportedTransport == null)
+                    return NotFound(new ErrorMessage("Transport not found.", "RC_CR_3"));
+            }
+
+            if (reportCreateDto.ReportedDemandId != null)
+            {
+                reportedDemand = await _repository.GetDemandAsync((Guid)reportCreateDto.ReportedDemandId);
+                if (reportedDemand == null)
+                    return NotFound(new ErrorMessage("Demand not found.", "RC_CR_4"));
+            }
+
+            if (reportCreateDto.ReportedGroupId != null)
+            {
+                reportedGroup = await _repository.GetGroupAsync((Guid)reportCreateDto.ReportedGroupId);
+                if (reportedGroup == null)
+                    return NotFound(new ErrorMessage("Demand not found.", "RC_CR_5"));
+            }
+
             var report = _mapper.Map<Report>(reportCreateDto);
             report.Reporter = issuer;
             report.Reported = reported;
             report.CreationDate = DateTime.UtcNow;
             report.Status = ReportStatus.Issued;
 
+            report.ReportedTransport = reportedTransport;
+            report.ReportedDemand = reportedDemand;
+            report.ReportedGroup = reportedGroup;
+
             _repository.CreateReport(report);
             if (!await _repository.SaveChangesAsync())
-                return BadRequest(new ErrorMessage("Failed to create a report.", "RC_CR_3"));
+                return BadRequest(new ErrorMessage("Failed to create a report.", "RC_CR_6"));
             
             var reportReadDto = _mapper.Map<ReportReadDto>(report);
             return CreatedAtRoute(nameof(GetReport), new { reportId = reportReadDto.ReportId }, reportReadDto);

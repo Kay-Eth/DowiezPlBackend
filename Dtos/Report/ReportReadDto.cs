@@ -1,6 +1,9 @@
 using System;
 using System.ComponentModel.DataAnnotations;
 using DowiezPlBackend.Dtos.Account;
+using DowiezPlBackend.Dtos.Demand;
+using DowiezPlBackend.Dtos.Group;
+using DowiezPlBackend.Dtos.Transport;
 using DowiezPlBackend.Enums;
 
 namespace DowiezPlBackend.Dtos.Report
@@ -20,6 +23,9 @@ namespace DowiezPlBackend.Dtos.Report
         [Required]
         public AccountLimitedReadDto ReporterDto { get; set; }
         public AccountLimitedReadDto ReportedDto { get; set; }
+        public TransportReadDto ReportedTransport { get; set; }
+        public DemandReadDto ReportedDemand { get; set; }
+        public GroupReadDto ReportedGroup { get; set; }
 
         public AccountLimitedReadDto OperatorDto { get; set; }
     }

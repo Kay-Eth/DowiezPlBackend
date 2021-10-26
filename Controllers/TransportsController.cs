@@ -277,7 +277,7 @@ namespace DowiezPlBackend.Controllers
         /// <response code="204">Transport successfully canceled</response>
         /// <response code="400">Failed to cancel transport</response>
         /// <response code="404">Transport not found</response>
-        [HttpPost("{transportId}/cancel")]
+        [HttpPost("{transportId}/cancel/moderator")]
         [Authorize(Roles = "Moderator,Admin")]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(typeof(ErrorMessage), StatusCodes.Status400BadRequest)]

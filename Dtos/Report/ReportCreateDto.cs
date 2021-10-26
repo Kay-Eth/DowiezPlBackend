@@ -15,5 +15,8 @@ namespace DowiezPlBackend.Dtos.Report
         public ReportCategory Category { get; set; }
 
         public Guid? ReportedId { get; set; }
+        public Guid? ReportedTransportId { get; set; }
+        public Guid? ReportedDemandId { get; set; }
+        public Guid? ReportedGroupId { get; set; }
     }
 }

@@ -28,6 +28,9 @@ namespace DowiezPlBackend.Models
         public AppUser Reporter { get; set; }
 
         public AppUser Reported { get; set; }
+        public Transport ReportedTransport { get; set; }
+        public Demand ReportedDemand { get; set; }
+        public Group ReportedGroup { get; set; }
 
         public AppUser Operator { get; set; }
     }

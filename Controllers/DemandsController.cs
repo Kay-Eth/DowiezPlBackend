@@ -347,7 +347,7 @@ namespace DowiezPlBackend.Controllers
         /// <response code="204">Demand successfully canceled</response>
         /// <response code="400">Failed to cancel demand</response>
         /// <response code="404">Demand not found</response>
-        [HttpPost("{demandId}/cancel")]
+        [HttpPost("{demandId}/cancel/moderator")]
         [Authorize(Roles = "Moderator,Admin")]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(typeof(ErrorMessage), StatusCodes.Status400BadRequest)]
