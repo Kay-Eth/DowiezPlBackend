@@ -16,7 +16,12 @@ namespace DowiezPlBackend.Services
         {
             _mailSettings = mailSettings.Value;
         }
-        
+
+        public Task SendBannedAsync(string emailAddress, string moderatorEmailAddress, string moderatorName, string moderatorId)
+        {
+            return null;
+        }
+
         public async Task SendEmailAsync(MimeMessage message)
         {
             using var smtp = new SmtpClient();

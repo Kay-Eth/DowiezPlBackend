@@ -284,15 +284,20 @@ namespace DowiezPlBackend.Controllers
         /// <response code="400">Request fails</response>
         /// <response code="401">User not authenticated</response>
         /// <response code="403">User not authorized</response>
-        [HttpPost("block/{userId}/{status}")]
+        [HttpPost("ban/{userId}/{status}")]
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = "Moderator,Admin")]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public async Task<ActionResult> BlockUser(string userId, bool status)
+        public async Task<ActionResult> BanUser(string userId, bool status)
         {
             var user = await _userManager.FindByIdAsync(userId);
             if (user == null)
                 return NotFound(new ErrorMessage($"User with id {userId} not found."));
+            if (status && !user.Banned)
+            {
+                
+            }
+
             user.Banned = status;
             await _userManager.UpdateAsync(user);
 
