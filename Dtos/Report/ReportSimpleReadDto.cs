@@ -14,5 +14,7 @@ namespace DowiezPlBackend.Dtos.Report
         public ReportCategory Category { get; set; }
         [Required]
         public ReportStatus Status { get; set; }
+        [Required]
+        public bool Assigned { get; set; }
     }
 }

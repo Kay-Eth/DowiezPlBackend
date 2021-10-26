@@ -10,7 +10,9 @@ namespace DowiezPlBackend.Profiles
         public ReportProfile()
         {
             CreateMap<Report, ReportReadDto>();
-            CreateMap<Report, ReportSimpleReadDto>();
+            CreateMap<Report, ReportSimpleReadDto>()
+                .ForMember(dest => dest.Assigned,
+                    opts => opts.MapFrom(src => src.Operator != null));
             CreateMap<ReportCreateDto, Report>();
             CreateMap<ReportUpdateDto, Report>();
         }
