@@ -14,5 +14,7 @@ namespace DowiezPlBackend.Dtos.Stats
         public int GroupCount { get; set; }
         [Required]
         public int TechnicalCount { get; set; }
+        [Required]
+        public int OpinionCount { get; set; }
     }
 }

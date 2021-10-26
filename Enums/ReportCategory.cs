@@ -6,7 +6,7 @@ namespace DowiezPlBackend.Enums
         Transport,
         Demand,
         Group,
-        Technical
-
+        Technical,
+        Opinion,
     }
 }

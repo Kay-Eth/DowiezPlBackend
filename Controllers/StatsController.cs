@@ -46,6 +46,7 @@ namespace DowiezPlBackend.Controllers
             result.DemandCount = reports.Count(r => r.Category == ReportCategory.Demand);
             result.GroupCount = reports.Count(r => r.Category == ReportCategory.Group);
             result.TechnicalCount = reports.Count(r => r.Category == ReportCategory.Technical);
+            result.OpinionCount = reports.Count(r => r.Category == ReportCategory.Opinion);
 
             return Ok(result);
         }
