@@ -203,7 +203,6 @@ namespace DowiezPlBackend
                 
                 app.UseSwagger();
                 app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "DowiezPlBackend v1"));
-
             }
             else
             {

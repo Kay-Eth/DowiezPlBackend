@@ -17,6 +17,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
 using Newtonsoft.Json;
@@ -58,15 +59,28 @@ namespace DowiezPlBackend.Controllers
         }
 
         /// <summary>
-        /// Returns all accounts. Try not to use that. Use UserIds and retrieve info with /api/Accounts/{userId} method
+        /// Returns all accounts.
         /// </summary>
         /// <response code="200">Returns object with user data</response>
         [HttpGet]
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = "Moderator,Admin")]
         [ProducesResponseType(StatusCodes.Status200OK)]
-        public ActionResult<IEnumerable<AccountReadDto>> GetAccounts()
+        public async Task<ActionResult<IEnumerable<AccountReadDto>>> GetAccounts()
         {
-            var result = _userManager.Users.ToList();
+            var result = await _userManager.Users.ToListAsync();
+            return Ok(_mapper.Map<IEnumerable<AccountReadDto>>(result));
+        }
+
+        /// <summary>
+        /// Returns banned accounts.
+        /// </summary>
+        /// <response code="200">Returns object with user data</response>
+        [HttpGet("banned")]
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = "Moderator,Admin")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        public async Task<ActionResult<IEnumerable<AccountReadDto>>> GetBlockedAccounts()
+        {
+            var result = await _userManager.Users.Where(u => u.Banned).ToListAsync();
             return Ok(_mapper.Map<IEnumerable<AccountReadDto>>(result));
         }
         

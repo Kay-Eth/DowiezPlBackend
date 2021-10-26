@@ -271,6 +271,47 @@ namespace DowiezPlBackend.Controllers
         }
 
         /// <summary>
+        /// Cancels a transport (Moderator and Admins only)
+        /// </summary>
+        /// <param name="transportId">Transport's Id</param>
+        /// <response code="204">Transport successfully canceled</response>
+        /// <response code="400">Failed to cancel transport</response>
+        /// <response code="404">Transport not found</response>
+        [HttpPost("{transportId}/cancel")]
+        [Authorize(Roles = "Moderator,Admin")]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(typeof(ErrorMessage), StatusCodes.Status400BadRequest)]
+        public async Task<ActionResult> CancelTransportModerator(Guid transportId)
+        {
+            var transportFromRepo = await _repository.GetTransportAsync(transportId);
+
+            if (transportFromRepo == null)
+                return NotFound();
+            
+            if (transportFromRepo.Status == TransportStatus.Canceled)
+                return BadRequest(new ErrorMessage("Transport is already canceled", "TC_CaT_1"));
+            
+            if (transportFromRepo.Status != TransportStatus.Declared)
+                return BadRequest(new ErrorMessage("Cannot cancel a transport with status other than Declared.", "TC_CaT_2"));
+            
+            transportFromRepo.Status = TransportStatus.Canceled;
+            _repository.DeleteConversation(transportFromRepo.TransportConversation);
+            transportFromRepo.TransportConversation = null;
+
+            var demands = transportFromRepo.Demands;
+            foreach (var demand in demands)
+            {
+                demand.Transport = null;
+                demand.Status = DemandStatus.Created;
+            }
+
+            if (!await _repository.SaveChangesAsync())
+                return BadRequest(new ErrorMessage("Failed to cancel a transport.", "TC_CaT_3"));
+            
+            return NoContent();
+        }
+
+        /// <summary>
         /// Returns data of a demands connected to the transport
         /// </summary>
         /// <param name="transportId"></param>

@@ -341,6 +341,49 @@ namespace DowiezPlBackend.Controllers
         }
 
         /// <summary>
+        /// Cancels a demand (Moderators and Admins only)
+        /// </summary>
+        /// <param name="demandId">Demand's Id</param>
+        /// <response code="204">Demand successfully canceled</response>
+        /// <response code="400">Failed to cancel demand</response>
+        /// <response code="404">Demand not found</response>
+        [HttpPost("{demandId}/cancel")]
+        [Authorize(Roles = "Moderator,Admin")]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(typeof(ErrorMessage), StatusCodes.Status400BadRequest)]
+        public async Task<ActionResult> CancelDemandModerator(Guid demandId)
+        {
+            var demandFromRepo = await _repository.GetDemandAsync(demandId);
+
+            if (demandFromRepo == null)
+                return NotFound();
+            
+            if (demandFromRepo.Status == DemandStatus.InProgress
+                || demandFromRepo.Status == DemandStatus.Finished)
+            {
+                return BadRequest(new ErrorMessage("Cannot cancel a demand with status InProgress or Finished", "DC_CaD_1"));
+            }
+
+            if (demandFromRepo.Status == DemandStatus.Canceled)
+            {
+                return BadRequest(new ErrorMessage("Demand is already canceled.", "DC_CaD_2"));
+            }
+
+            demandFromRepo.Status = DemandStatus.Canceled;
+            if ((await _repository.GetUserDemandsAsync(demandFromRepo.Creator.Id))
+                .Count(d => d.Transport.TransportId == demandFromRepo.Transport.TransportId) == 1)
+            {
+                await _repository.RemoveUserFromConversation(demandFromRepo.Creator, demandFromRepo.Transport.TransportConversation);
+            }
+            demandFromRepo.Transport = null;
+
+            if (!await _repository.SaveChangesAsync())
+                return BadRequest(new ErrorMessage("Failed to cancel a demand.", "DC_CaD_3"));
+            
+            return NoContent();
+        }
+
+        /// <summary>
         /// Request to carry a demand within a transport
         /// </summary>
         /// <param name="demandId">Demand's Id</param>

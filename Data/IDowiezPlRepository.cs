@@ -57,6 +57,7 @@ namespace DowiezPlBackend.Data
         void CreateReport(Report report);
         Task<List<Report>> GetIssuedReportsAsync();
         Task<List<Report>> GetReportsAsync();
+        Task<List<Report>> GetReportsFilterAsync(ReportCategory? category, ReportStatus? status, AppUser assignedTo);
         Task<List<Report>> GetUserReportsAsync(Guid userId);
         Task<Report> GetReportAsync(Guid reportId);
         Task<Report> GetReportNotTrackedAsync(Guid reportId);

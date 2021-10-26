@@ -23,6 +23,19 @@ namespace DowiezPlBackend.Data
             return await _context.Reports.AsNoTracking()
                 .Include(r => r.Reporter)
                 .Include(r => r.Reported)
+                .Include(r => r.Operator)
+                .ToListAsync();
+        }
+
+        public async Task<List<Report>> GetReportsFilterAsync(ReportCategory? category, ReportStatus? status, AppUser assignedTo)
+        {
+            return await _context.Reports.AsNoTracking()
+                .Include(r => r.Reported)
+                .Include(r => r.Reporter)
+                .Include(r => r.Operator)
+                .Where(r => category == null ? true : r.Category == category)
+                .Where(r => status == null ? true : r.Status == status)
+                .Where(r => assignedTo == null ? true : r.Operator.Id == assignedTo.Id)
                 .ToListAsync();
         }
 
@@ -32,6 +45,7 @@ namespace DowiezPlBackend.Data
                 .Where(r => r.Status == ReportStatus.Issued)
                 .Include(r => r.Reporter)
                 .Include(r => r.Reported)
+                .Include(r => r.Operator)
                 .ToListAsync();
         }
 
@@ -40,6 +54,7 @@ namespace DowiezPlBackend.Data
             return await _context.Reports
                 .Include(r => r.Reporter)
                 .Include(r => r.Reported)
+                .Include(r => r.Operator)
                 .FirstOrDefaultAsync(r => r.ReportId == reportId);
         }
 
@@ -48,6 +63,7 @@ namespace DowiezPlBackend.Data
             return await _context.Reports.AsNoTracking()
                 .Include(r => r.Reporter)
                 .Include(r => r.Reported)
+                .Include(r => r.Operator)
                 .FirstOrDefaultAsync(r => r.ReportId == reportId);
         }
 
@@ -64,6 +80,7 @@ namespace DowiezPlBackend.Data
             return await _context.Reports.AsNoTracking()
                 .Include(r => r.Reporter)
                 .Include(r => r.Reported)
+                .Include(r => r.Operator)
                 .Where(r => r.Reporter.Id == userId)
                 .ToListAsync();
         }

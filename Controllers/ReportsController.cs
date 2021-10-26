@@ -33,9 +33,14 @@ namespace DowiezPlBackend.Controllers
         [HttpGet]
         [Authorize(Roles = "Moderator,Admin")]
         [ProducesResponseType(StatusCodes.Status200OK)]
-        public async Task<ActionResult<IEnumerable<ReportSimpleReadDto>>> GetReports()
+        public async Task<ActionResult<IEnumerable<ReportSimpleReadDto>>> GetReports(
+            ReportCategory? category,
+            ReportStatus? status,
+            bool? assignedToMe
+        )
         {
-            var results = await _repository.GetReportsAsync();
+            var me = await GetMyUserAsync();
+            var results = await _repository.GetReportsFilterAsync(category, status, assignedToMe == null ? null : ((bool)assignedToMe ? me : null));
             return Ok(_mapper.Map<IEnumerable<ReportSimpleReadDto>>(results));
         }
         

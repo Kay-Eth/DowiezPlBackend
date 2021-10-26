@@ -16,5 +16,7 @@ namespace DowiezPlBackend.Dtos.Account
         public string LastName { get; set; }
         [Required]
         public Role Role { get; set; }
+        [Required]
+        public bool Banned { get; set; }
     }
 }
