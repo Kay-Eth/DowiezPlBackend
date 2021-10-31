@@ -91,7 +91,6 @@ namespace DowiezPlBackend.Controllers
         {
             var userDb = await GetMyUserAsync();
             var results = await _repository.GetUserTransportsAsync(userDb.Id);
-            Console.WriteLine(results);
             return Ok(_mapper.Map<IEnumerable<TransportSimpleReadDto>>(results));
         }
 
