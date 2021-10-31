@@ -19,6 +19,7 @@ namespace DowiezPlBackend.Data
         }
 
         public async Task<List<Transport>> SearchTransportsAsync(
+            AppUser excludeUser,
             ICollection<TransportCategory> categories,
             Guid? startsInCityId,
             Guid? endsInCityId)
@@ -50,6 +51,7 @@ namespace DowiezPlBackend.Data
                     && categories.Contains(t.Category)
                     && (startsInCityId == null ? true : startCities.Contains(t.StartsIn.CityId))
                     && (endsInCityId == null ? true : endCities.Contains(t.EndsIn.CityId))
+                    && t.Creator.Id != excludeUser.Id
                 ).ToListAsync();
         }
 

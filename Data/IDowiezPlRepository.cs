@@ -65,6 +65,7 @@ namespace DowiezPlBackend.Data
 
         void CreateTransport(Transport transport);
         Task<List<Transport>> SearchTransportsAsync(
+            AppUser excludeUser,
             ICollection<TransportCategory> categories,
             Guid? startsInCityId,
             Guid? endsInCityId

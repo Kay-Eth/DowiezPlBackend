@@ -42,6 +42,8 @@ namespace DowiezPlBackend.Controllers
             Guid? startCityId,
             Guid? endCityId)
         {
+            var me = await GetMyUserAsync();
+
             var categories_array = categories.Split(",");
             var categories_list = new List<TransportCategory>();
 
@@ -72,6 +74,7 @@ namespace DowiezPlBackend.Controllers
             }
 
             var results = await _repository.SearchTransportsAsync(
+                me,
                 categories_list,
                 startCityId,
                 endCityId
