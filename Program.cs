@@ -48,6 +48,7 @@ namespace DowiezPlBackend
                             EmailConfirmed = true
                         };
                         await userManager.CreateAsync(user, "DefaultPassword@123");
+                        await userManager.AddToRoleAsync(user, "Moderator");
                         await userManager.AddToRoleAsync(user, "Admin");
                         await userManager.AddClaimAsync(user, new Claim("Banned", "false"));
                     }

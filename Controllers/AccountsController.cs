@@ -121,10 +121,10 @@ namespace DowiezPlBackend.Controllers
         /// </summary>
         /// <response code="200">Returns object with user data</response>
         /// <response code="400">Cannot retrieve information about moderator accounts</response>
-        /// <response code="403">Only moderators can do it</response>
+        /// <response code="403">Only admin can do it</response>
         /// <response code="404">Account not found</response>
         [HttpGet("{userId}")]
-        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = "Moderator,Admin")]
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = "Admin")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         public async Task<ActionResult<AccountReadDto>> GetUserAccount(Guid userId)
         {
