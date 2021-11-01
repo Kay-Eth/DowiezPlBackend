@@ -58,6 +58,26 @@ namespace DowiezPlBackend.Controllers
             return (await userManager.FindByIdAsync(userId)) != null;
         }
 
+        protected async Task<bool> IsAdmin(AppUser user)
+        {
+            var roles = await _userManager.GetRolesAsync(user);
+            for (int i = 0; i < roles.Count; i++)
+            {
+                if (roles[i] == "Admin")
+                    return true;
+            }
+
+            return false;
+        }
+
+        protected async Task<AppUser> GetMyUserAsync()
+        {
+            var userDb = await _userManager.FindByNameAsync(HttpContext.User.Identity.Name);
+            if (userDb == null)
+                return null;
+            return userDb;
+        }
+
         /// <summary>
         /// Returns all accounts.
         /// </summary>
@@ -124,18 +144,19 @@ namespace DowiezPlBackend.Controllers
         /// <response code="403">Only admin can do it</response>
         /// <response code="404">Account not found</response>
         [HttpGet("{userId}")]
-        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = "Admin")]
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = "Moderator,Admin")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         public async Task<ActionResult<AccountReadDto>> GetUserAccount(Guid userId)
         {
             var user = await _userManager.FindByIdAsync(userId.ToString());
             if (user == null)
                 return NotFound();
-            
+            bool isNotAdmin = !(await IsAdmin(await GetMyUserAsync()));
+
             var roles = await _userManager.GetRolesAsync(user);
             for (int i = 0; i < roles.Count; i++)
             {
-                if (roles[i] == "Moderator" || roles[i] == "Admin")
+                if (isNotAdmin && (roles[i] == "Moderator" || roles[i] == "Admin"))
                     return BadRequest(new ErrorMessage("Cannot retrieve information about moderator accounts", "AC_GUA_1"));
             }
             
