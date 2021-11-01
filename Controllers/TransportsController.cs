@@ -111,7 +111,7 @@ namespace DowiezPlBackend.Controllers
             var user = await GetUserAsync(userId.ToString());
             if (user == null)
                 return NotFound();
-            var results = _repository.GetUserTransportsAsync(userId);
+            var results = await _repository.GetUserTransportsAsync(userId);
             return Ok(_mapper.Map<IEnumerable<TransportSimpleReadDto>>(results));
         }
 
