@@ -59,7 +59,7 @@ namespace DowiezPlBackend.Services
             str.Close();
 
             var builder = new BodyBuilder();
-            builder.HtmlBody = text.Replace("[USERID]", userId).Replace("[TOKEN]", token);
+            builder.HtmlBody = text.Replace("[USERID]", userId).Replace("[TOKEN]", token.Replace("/", "%2F").Replace("+", "%2B"));
             message.Body = builder.ToMessageBody();
 
             await SendEmailAsync(message);
