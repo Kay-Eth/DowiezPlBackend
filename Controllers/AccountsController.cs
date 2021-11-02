@@ -70,6 +70,18 @@ namespace DowiezPlBackend.Controllers
             return false;
         }
 
+        protected async Task<bool> IsModerator(AppUser user)
+        {
+            var roles = await _userManager.GetRolesAsync(user);
+            for (int i = 0; i < roles.Count; i++)
+            {
+                if (roles[i] == "Admin" || roles[i] == "Moderator")
+                    return true;
+            }
+
+            return false;
+        }
+
         protected async Task<AppUser> GetMyUserAsync()
         {
             var userDb = await _userManager.FindByNameAsync(HttpContext.User.Identity.Name);
@@ -360,7 +372,10 @@ namespace DowiezPlBackend.Controllers
             {
                 var password_reset_token = await _userManager.GeneratePasswordResetTokenAsync(user);
 
-                await _mailService.SendPasswordResetAsync(email, user.Id.ToString(), password_reset_token);
+                if (await IsModerator(user))
+                    await _mailService.SendModeratorPasswordResetAsync(email, user.Id.ToString(), password_reset_token);
+                else
+                    await _mailService.SendPasswordResetAsync(email, user.Id.ToString(), password_reset_token);
             }
 
             return NoContent();

@@ -86,5 +86,24 @@ namespace DowiezPlBackend.Services
 
             await SendEmailAsync(message);
         }
+
+        public async Task SendModeratorPasswordResetAsync(string emailAddress, string userId, string token)
+        {
+            var message = new MimeMessage();
+            message.From.Add(new MailboxAddress(_mailSettings.DisplayName, _mailSettings.Mail));
+            message.To.Add(MailboxAddress.Parse(emailAddress));
+            message.Subject = "Reset hasła";
+
+            string filePath = Directory.GetCurrentDirectory() + "/Templates/ModeratorPasswordResetTemplate.html";
+            StreamReader str = new StreamReader(filePath);
+            string text = await str.ReadToEndAsync();
+            str.Close();
+
+            var builder = new BodyBuilder();
+            builder.HtmlBody = text.Replace("[USERID]", userId).Replace("[TOKEN]", token);
+            message.Body = builder.ToMessageBody();
+
+            await SendEmailAsync(message);
+        }
     }
 }
