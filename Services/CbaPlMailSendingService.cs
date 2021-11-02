@@ -60,9 +60,9 @@ namespace DowiezPlBackend.Services
             str.Close();
 
             var builder = new BodyBuilder();
-            var token_alter = token.Replace("/", "%2F").Replace("+", "%2B");
-            Console.WriteLine(token_alter);
-            builder.HtmlBody = text.Replace("[USERID]", userId).Replace("[TOKEN]", token_alter);
+            // var token_alter = token.Replace("/", "%2F").Replace("+", "%2B");
+            // Console.WriteLine(token_alter);
+            builder.HtmlBody = text.Replace("[USERID]", userId).Replace("[TOKEN]", token);
             message.Body = builder.ToMessageBody();
 
             await SendEmailAsync(message);
@@ -102,8 +102,9 @@ namespace DowiezPlBackend.Services
             string text = await str.ReadToEndAsync();
             str.Close();
 
+            var token_alter = token.Replace("/", "%2F").Replace("+", "%2B");
             var builder = new BodyBuilder();
-            builder.HtmlBody = text.Replace("[USERID]", userId).Replace("[TOKEN]", token);
+            builder.HtmlBody = text.Replace("[USERID]", userId).Replace("[TOKEN]", token_alter);
             message.Body = builder.ToMessageBody();
 
             await SendEmailAsync(message);
