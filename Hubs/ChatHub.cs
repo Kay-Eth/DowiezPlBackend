@@ -37,7 +37,7 @@ namespace DowiezPlBackend.Hubs
             return (await _context.Users.SingleAsync(x => x.UserName == Context.User.Identity.Name)).Id.ToString();
         }
 
-        public async Task SendToConversation(string conversationId, string message)
+        public async Task<bool> SendToConversation(string conversationId, string message)
         {
             var messageEntity = new Message()
             {
@@ -49,6 +49,8 @@ namespace DowiezPlBackend.Hubs
             _context.Messages.Add(messageEntity);
             await _context.SaveChangesAsync();
             await Clients.Group(conversationId).SendAsync("Send", conversationId, messageEntity.Sender.Id, messageEntity.MessageId, messageEntity.SentDate, message);
+
+            return true;
         }
 
         public async Task NotifyNewConv(string conversationId, Guid accountId)
