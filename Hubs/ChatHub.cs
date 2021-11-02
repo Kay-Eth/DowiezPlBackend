@@ -66,12 +66,12 @@ namespace DowiezPlBackend.Hubs
 
         public async Task NotifyChatJoin(string conversationId, Guid accountId)
         {
-            await Clients.Group(conversationId).SendAsync("ConvJoined", conversationId, accountId.ToString());
+            await Clients.Group(conversationId).SendAsync("GroupJoin", conversationId, accountId.ToString());
         }
 
         public async Task NotifyChatLeave(string conversationId, Guid accountId)
         {
-            await Clients.Group(conversationId).SendAsync("ConvLeft", conversationId, accountId.ToString());
+            await Clients.Group(conversationId).SendAsync("GroupLeave", conversationId, accountId.ToString());
         }
 
         public override async Task OnConnectedAsync()
