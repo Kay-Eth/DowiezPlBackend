@@ -94,6 +94,20 @@ namespace DowiezPlBackend.Controllers
             if (reportFromRepo.Operator != null)
                 dto.OperatorDto = _mapper.Map<AccountLimitedReadDto>(reportFromRepo.Operator);
 
+            if (reportFromRepo.Category == ReportCategory.Transport)
+                dto.TransportId = reportFromRepo.ReportedTransport.TransportId;
+            else if (reportFromRepo.Category == ReportCategory.Demand)
+                dto.DemandId = reportFromRepo.ReportedDemand.DemandId;
+            else if (reportFromRepo.Category == ReportCategory.Group)
+                dto.GroupId = reportFromRepo.ReportedGroup.GroupId;
+            else if (reportFromRepo.Category == ReportCategory.Opinion)
+            {
+                var opinion = await _repository.GetOpinionPairAsync(reportFromRepo.Reported.Id, reportFromRepo.Reporter.Id);
+                if (opinion != null)
+                {
+                    dto.OpinionId = opinion.OpinionId;
+                }
+            }
 
             return Ok(dto);
         }
@@ -147,6 +161,15 @@ namespace DowiezPlBackend.Controllers
                     return NotFound(new ErrorMessage("Demand not found.", "RC_CR_5"));
             }
 
+            if (reportCreateDto.Category == ReportCategory.Opinion)
+            {
+                if (reportCreateDto.ReportedId == null)
+                    return BadRequest(new ErrorMessage("Cannot create a report with Opinion category, if ReportedId is null.", "RC_CR_6"));
+                var opinion = await _repository.GetOpinionPairAsync((Guid)reportCreateDto.ReportedId, issuer.Id);
+                if (opinion == null)
+                    return NotFound(new ErrorMessage("Opinion not found.", "RC_CR_7"));
+            }
+
             var report = _mapper.Map<Report>(reportCreateDto);
             report.Reporter = issuer;
             report.Reported = reported;
@@ -159,7 +182,7 @@ namespace DowiezPlBackend.Controllers
 
             _repository.CreateReport(report);
             if (!await _repository.SaveChangesAsync())
-                return BadRequest(new ErrorMessage("Failed to create a report.", "RC_CR_6"));
+                return BadRequest(new ErrorMessage("Failed to create a report.", "RC_CR_8"));
             
             var reportReadDto = _mapper.Map<ReportReadDto>(report);
             return CreatedAtRoute(nameof(GetReport), new { reportId = reportReadDto.ReportId }, reportReadDto);

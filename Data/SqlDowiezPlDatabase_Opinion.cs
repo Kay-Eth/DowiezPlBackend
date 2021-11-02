@@ -26,6 +26,14 @@ namespace DowiezPlBackend.Data
                 .ToListAsync();
         }
 
+        public async Task<Opinion> GetOpinionPairAsync(Guid issuerId, Guid ratedId)
+        {
+            return await _context.Opinions.AsNoTracking()
+                .Include(o => o.Issuer)
+                .Include(o => o.Rated)
+                .FirstOrDefaultAsync(o => o.Issuer.Id == issuerId && o.Rated.Id == ratedId);
+        }
+
         public async Task<List<Opinion>> GetOpinionsAboutUserAsync(string userId)
         {
             return await _context.Opinions.AsNoTracking()
