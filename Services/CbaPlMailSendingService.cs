@@ -60,9 +60,8 @@ namespace DowiezPlBackend.Services
             str.Close();
 
             var builder = new BodyBuilder();
-            // var token_alter = token.Replace("/", "%2F").Replace("+", "%2B");
-            // Console.WriteLine(token_alter);
-            builder.HtmlBody = text.Replace("[USERID]", userId).Replace("[TOKEN]", token);
+            var token_alter = token.Replace("/", "%2F").Replace("+", "%2B");
+            builder.HtmlBody = text.Replace("[USERID]", userId).Replace("[TOKEN]", token_alter);
             message.Body = builder.ToMessageBody();
 
             await SendEmailAsync(message);
