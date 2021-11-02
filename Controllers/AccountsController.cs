@@ -350,7 +350,7 @@ namespace DowiezPlBackend.Controllers
         public async Task<ActionResult> ConfirmEmail(AccountEmailConfirmationDto aecDto)
         {
             var user = await _userManager.FindByIdAsync(aecDto.UserId);
-            var result = await _userManager.ConfirmEmailAsync(user, aecDto.Token)    ;
+            var result = await _userManager.ConfirmEmailAsync(user, aecDto.Token);
 
             if (result.Succeeded)
                 return NoContent();
