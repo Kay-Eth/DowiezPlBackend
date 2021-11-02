@@ -70,7 +70,7 @@ namespace DowiezPlBackend.Services
             var message = new MimeMessage();
             message.From.Add(new MailboxAddress(_mailSettings.DisplayName, _mailSettings.Mail));
             message.To.Add(MailboxAddress.Parse(emailAddress));
-            message.Subject = "Potwierdzenie adresu Email";
+            message.Subject = "Twoje konto zostało zbanowane";
 
             string filePath = Directory.GetCurrentDirectory() + "/Templates/BannedTemplate.html";
             StreamReader str = new StreamReader(filePath);
