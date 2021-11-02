@@ -40,7 +40,7 @@ namespace DowiezPlBackend.Services
             string text = await str.ReadToEndAsync();
             str.Close();
 
-            var token_alter = token.Replace("/", "%2F").Replace("+", "%2B");
+            var token_alter = token.Replace("/", "%2F").Replace("+", "%2B").Replace("=", "%3D");
             var builder = new BodyBuilder();
             builder.HtmlBody = text.Replace("[USERID]", userId).Replace("[TOKEN]", token_alter);
             message.Body = builder.ToMessageBody();
@@ -61,7 +61,7 @@ namespace DowiezPlBackend.Services
             str.Close();
 
             var builder = new BodyBuilder();
-            var token_alter = token.Replace("/", "%2F").Replace("+", "%2B");
+            var token_alter = token.Replace("/", "%2F").Replace("+", "%2B").Replace("=", "%3D");
             builder.HtmlBody = text.Replace("[USERID]", userId).Replace("[TOKEN]", token_alter);
             message.Body = builder.ToMessageBody();
 
@@ -102,7 +102,7 @@ namespace DowiezPlBackend.Services
             string text = await str.ReadToEndAsync();
             str.Close();
 
-            var token_alter = token.Replace("/", "%2F").Replace("+", "%2B");
+            var token_alter = token.Replace("/", "%2F").Replace("+", "%2B").Replace("=", "%3D");
             var builder = new BodyBuilder();
             builder.HtmlBody = text.Replace("[USERID]", userId).Replace("[TOKEN]", token_alter);
             message.Body = builder.ToMessageBody();
