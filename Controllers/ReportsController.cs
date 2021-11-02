@@ -98,8 +98,6 @@ namespace DowiezPlBackend.Controllers
                 dto.TransportId = reportFromRepo.ReportedTransport.TransportId;
             else if (reportFromRepo.Category == ReportCategory.Demand)
                 dto.DemandId = reportFromRepo.ReportedDemand.DemandId;
-            else if (reportFromRepo.Category == ReportCategory.Group)
-                dto.GroupId = reportFromRepo.ReportedGroup.GroupId;
             else if (reportFromRepo.Category == ReportCategory.Opinion)
             {
                 var opinion = await _repository.GetOpinionPairAsync(reportFromRepo.Reported.Id, reportFromRepo.Reporter.Id);
