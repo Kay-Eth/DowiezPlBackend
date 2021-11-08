@@ -14,6 +14,8 @@ namespace DowiezPlBackend.Dtos.Demand
         public string Description { get; set; }
         [Required]
         public DemandCategory Category { get; set; }
+        [Required]
+        public DemandStatus Status { get; set; }
         public CityReadDto From { get; set; }
         [Required]
         public CityReadDto Destination { get; set; }
