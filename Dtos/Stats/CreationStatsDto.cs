@@ -10,7 +10,7 @@ namespace DowiezPlBackend.Dtos.Stats
         // public Dictionary<string, int> Users { get; set; }
         // public Dictionary<string, int> Demands { get; set; }
         // public Dictionary<string, int> Transports { get; set; }
-        public List<DateTime> Dates { get; set; }
+        public List<string> Dates { get; set; }
         public List<int> Users { get; set; }
         public List<int> Demands { get; set; }
         public List<int> Transports { get; set; }
