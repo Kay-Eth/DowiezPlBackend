@@ -24,8 +24,8 @@ namespace DowiezPlBackend.Services
 
         public StatsScheduleService(IServiceScopeFactory scopeFactory)
         {
-            // _expression = CronExpression.Parse("* * * * *");
-            _expression = CronExpression.Parse("0 3 * * *");
+            _expression = CronExpression.Parse("* * * * *");
+            // _expression = CronExpression.Parse("0 3 * * *");
             _timeZoneInfo = TimeZoneInfo.Utc;
             
             _scopeFactory = scopeFactory; 
@@ -92,13 +92,59 @@ namespace DowiezPlBackend.Services
                     .AsAsyncEnumerable()
                     .ToDictionaryAsync(v => v.Key, v => v.Count));
                 
+                var datetime_itr = (new List<DateTime>() { resultUsers.Keys.Min(), resultDemands.Keys.Min(), resultTransports.Keys.Min() }).Min();
+                var datetime_max = (new List<DateTime>() { resultUsers.Keys.Max(), resultDemands.Keys.Max(), resultTransports.Keys.Max() }).Max();
+
+                var list_dates = new List<DateTime>();
+                var list_users = new List<int>();
+                var list_demands = new List<int>();
+                var list_transports = new List<int>();
+
+                Console.WriteLine("MAX: " + datetime_max.ToString());
+
+                while (datetime_itr.Date <= datetime_max.Date)
+                {
+                    Console.WriteLine(datetime_itr.ToString());
+
+                    list_dates.Add(datetime_itr.Date);
+
+                    if (resultUsers.ContainsKey(datetime_itr.Date))
+                        list_users.Add(resultUsers[datetime_itr.Date]);
+                    else
+                        list_users.Add(0);
+                    
+                    if (resultDemands.ContainsKey(datetime_itr.Date))
+                        list_demands.Add(resultDemands[datetime_itr.Date]);
+                    else
+                        list_demands.Add(0);
+
+                    if (resultTransports.ContainsKey(datetime_itr.Date))
+                        list_transports.Add(resultTransports[datetime_itr.Date]);
+                    else
+                        list_transports.Add(0);
+
+                    datetime_itr = datetime_itr.AddDays(1);
+                }
+                
+                // await File.WriteAllTextAsync(STATS_FILE_PATH, JsonConvert.SerializeObject(
+                //     new Dictionary<string, object>()
+                //     {
+                //         { "CreationDate", DateTime.UtcNow.ToString("o") },
+                //         { "Users", resultUsers },
+                //         { "Demands", resultDemands },
+                //         { "Transports", resultTransports }
+                //     }, new JsonSerializerSettings() {
+                //         DateFormatString = "yyyy-MM-dd"
+                //     }), System.Text.Encoding.UTF8);
+
                 await File.WriteAllTextAsync(STATS_FILE_PATH, JsonConvert.SerializeObject(
                     new Dictionary<string, object>()
                     {
                         { "CreationDate", DateTime.UtcNow.ToString("o") },
-                        { "Users", resultUsers },
-                        { "Demands", resultDemands },
-                        { "Transports", resultTransports }
+                        { "Dates", list_dates },
+                        { "Users", list_users },
+                        { "Demands", list_demands },
+                        { "Transports", list_transports }
                     }, new JsonSerializerSettings() {
                         DateFormatString = "yyyy-MM-dd"
                     }), System.Text.Encoding.UTF8);
