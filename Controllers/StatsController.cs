@@ -34,6 +34,18 @@ namespace DowiezPlBackend.Controllers
             _mapper = mapper;
         }
 
+        protected async Task<bool> IsAdmin(AppUser user)
+        {
+            var roles = await _userManager.GetRolesAsync(user);
+            for (int i = 0; i < roles.Count; i++)
+            {
+                if (roles[i] == "Admin")
+                    return true;
+            }
+
+            return false;
+        }
+
         /// <summary>
         /// Returns count of issued reports divided to categories
         /// </summary>
@@ -88,6 +100,9 @@ namespace DowiezPlBackend.Controllers
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<ActionResult<CreationStatsDto>> GetCreationStats()
         {
+            if (!await IsAdmin(await GetMyUserAsync()))
+                return Forbid();
+
             if (System.IO.File.Exists(StatsScheduleService.STATS_FILE_PATH))
             {
                 var result = Newtonsoft.Json.JsonConvert.DeserializeObject<CreationStatsDto>(await System.IO.File.ReadAllTextAsync(StatsScheduleService.STATS_FILE_PATH));
