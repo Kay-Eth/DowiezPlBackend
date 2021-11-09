@@ -17,6 +17,8 @@ namespace DowiezPlBackend.Dtos.Transport
         [Required]
         public TransportCategory Category { get; set; }
         [Required]
+        public TransportStatus Status { get; set; }
+        [Required]
         public CityReadDto StartsIn { get; set; }
         [Required]
         public CityReadDto EndsIn { get; set; }
