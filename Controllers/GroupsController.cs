@@ -61,6 +61,7 @@ namespace DowiezPlBackend.Controllers
         [ProducesResponseType(StatusCodes.Status200OK)]
         public async Task<ActionResult<IEnumerable<GroupReadDto>>> GetMyGroups()
         {
+            // TODO: Add creator info
             var me = await GetMyUserAsync();
             var groups = (await _repository.GetUserMembershipsAsync(me.Id)).Select(m => m.Group);
             return Ok(_mapper.Map<IEnumerable<GroupReadDto>>(groups));
