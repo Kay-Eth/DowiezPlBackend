@@ -254,14 +254,14 @@ namespace DowiezPlBackend.Controllers
             
             if (demandUpdateDto.FromCityId != null)
             {
-                var cityFrom = await _repository.GetCityNotTrackedAsync((Guid)(demandUpdateDto.FromCityId));
+                var cityFrom = await _repository.GetCityAsync((Guid)(demandUpdateDto.FromCityId));
                 if (cityFrom == null)
                     return NotFound(new ErrorMessage("City From does not exist.", "DC_UD_3"));
 
                 demandFromRepo.From = cityFrom;
             }
 
-            var cityDest = await _repository.GetCityNotTrackedAsync(demandUpdateDto.DestinationCityId);
+            var cityDest = await _repository.GetCityAsync(demandUpdateDto.DestinationCityId);
             if (cityDest == null)
                 return NotFound(new ErrorMessage("City Destination does not exist.", "DC_UD_4"));
             
@@ -278,7 +278,7 @@ namespace DowiezPlBackend.Controllers
 
             if (demandUpdateDto.LimitedToGroupId != null)
             {
-                var group = await _repository.GetGroupNotTrackedAsync((Guid)(demandUpdateDto.LimitedToGroupId));
+                var group = await _repository.GetGroupAsync((Guid)(demandUpdateDto.LimitedToGroupId));
                 if (group == null)
                     return NotFound(new ErrorMessage("Group does not exist.", "DC_UD_6"));
                 
