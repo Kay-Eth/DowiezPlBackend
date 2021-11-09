@@ -191,6 +191,8 @@ namespace DowiezPlBackend
             services.AddSwaggerGenNewtonsoftSupport();
 
             services.AddSignalR();
+
+            services.AddHostedService<StatsScheduleService>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

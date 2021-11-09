@@ -24,7 +24,7 @@ namespace DowiezPlBackend.Data
 
         public async Task<City> GetCityAsync(Guid cityId)
         {
-            return await _context.Cities.FirstOrDefaultAsync(c => c.CityId == cityId);
+            return await _context.Cities.AsQueryable().FirstOrDefaultAsync(c => c.CityId == cityId);
         }
 
         public async Task<City> GetCityNotTrackedAsync(Guid cityId)

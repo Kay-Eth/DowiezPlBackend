@@ -1,13 +1,17 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.IO;
 using System.Linq;
+using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 using AutoMapper;
 using DowiezPlBackend.Data;
+using DowiezPlBackend.Dtos;
 using DowiezPlBackend.Dtos.Stats;
 using DowiezPlBackend.Enums;
 using DowiezPlBackend.Models;
+using DowiezPlBackend.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
@@ -77,6 +81,22 @@ namespace DowiezPlBackend.Controllers
             result.Groups = await _repository.CountOfNewGroups(before);
 
             return Ok(result);
+        }
+
+        [HttpGet("creationStats")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        public async Task<ActionResult<CreationStatsDto>> GetCreationStats()
+        {
+            if (System.IO.File.Exists(StatsScheduleService.STATS_FILE_PATH))
+            {
+                var result = Newtonsoft.Json.JsonConvert.DeserializeObject<CreationStatsDto>(await System.IO.File.ReadAllTextAsync(StatsScheduleService.STATS_FILE_PATH));
+                return Ok(result);
+            }
+            else
+            {
+                return NotFound(new ErrorMessage("Stats not found. There are no stats available currently.", "SC_GCS_1"));
+            }
         }
     }
 }
