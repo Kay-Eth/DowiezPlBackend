@@ -105,7 +105,8 @@ namespace DowiezPlBackend.Controllers
 
             if (System.IO.File.Exists(StatsScheduleService.STATS_FILE_PATH))
             {
-                var result = Newtonsoft.Json.JsonConvert.DeserializeObject<CreationStatsDto>(await System.IO.File.ReadAllTextAsync(StatsScheduleService.STATS_FILE_PATH));
+                var result = Newtonsoft.Json.JsonConvert.DeserializeObject<CreationStatsDto>(
+                    await System.IO.File.ReadAllTextAsync(StatsScheduleService.STATS_FILE_PATH));
                 return Ok(result);
             }
             else

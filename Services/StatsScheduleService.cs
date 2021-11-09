@@ -92,15 +92,16 @@ namespace DowiezPlBackend.Services
                     .AsAsyncEnumerable()
                     .ToDictionaryAsync(v => v.Key, v => v.Count));
                 
-                await File.WriteAllTextAsync(STATS_FILE_PATH, JsonConvert.SerializeObject(new Dictionary<string, object>()
-                {
-                    { "CreationDate", DateTime.UtcNow.ToString("o") },
-                    { "Users", resultUsers },
-                    { "Demands", resultDemands },
-                    { "Transports", resultTransports }
-                }, new JsonSerializerSettings() {
-                    DateFormatString = "yyyy-MM-dd"
-                }), System.Text.Encoding.UTF8);
+                await File.WriteAllTextAsync(STATS_FILE_PATH, JsonConvert.SerializeObject(
+                    new Dictionary<string, object>()
+                    {
+                        { "CreationDate", DateTime.UtcNow.ToString("o") },
+                        { "Users", resultUsers },
+                        { "Demands", resultDemands },
+                        { "Transports", resultTransports }
+                    }, new JsonSerializerSettings() {
+                        DateFormatString = "yyyy-MM-dd"
+                    }), System.Text.Encoding.UTF8);
             }
 
             Console.WriteLine("Stats file creation finished.");
