@@ -110,10 +110,22 @@ namespace DowiezPlBackend.Controllers
         [HttpGet("banned")]
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = "Moderator,Admin")]
         [ProducesResponseType(StatusCodes.Status200OK)]
-        public async Task<ActionResult<IEnumerable<AccountReadDto>>> GetBlockedAccounts()
+        public async Task<ActionResult<IEnumerable<AccountLimitedReadDto>>> GetBlockedAccounts()
         {
             var result = await _userManager.Users.Where(u => u.Banned).ToListAsync();
-            return Ok(_mapper.Map<IEnumerable<AccountReadDto>>(result));
+            return Ok(_mapper.Map<IEnumerable<AccountLimitedReadDto>>(result));
+        }
+
+        [HttpGet("moderators")]
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = "Admin")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        public async Task<ActionResult<IEnumerable<AccountModeratorsDto>>> GetModeratorAccounts()
+        {
+            var role = await _context.Roles.AsQueryable().FirstOrDefaultAsync(r => r.Name == "Moderator");
+            var userIds = _context.UserRoles.AsQueryable().Where(r => r.RoleId == role.Id).Select(r => r.UserId);
+            var result = await _context.Users.AsQueryable().Where(u => userIds.Contains(u.Id)).ToListAsync();
+            
+            return Ok(_mapper.Map<IEnumerable<AccountModeratorsDto>>(result));
         }
         
         /// <summary>
