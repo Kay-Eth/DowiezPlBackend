@@ -171,8 +171,19 @@ namespace DowiezPlBackend.Controllers
                 if (isNotAdmin && (roles[i] == "Moderator" || roles[i] == "Admin"))
                     return BadRequest(new ErrorMessage("Cannot retrieve information about moderator accounts", "AC_GUA_1"));
             }
+
+            var result = _mapper.Map<AccountReadDto>(user);
+
+            if (roles[0] == "Standard")
+                result.Role = Enums.Role.Standard;
+            else if (roles[0] == "Moderator")
+                result.Role = Enums.Role.Moderator;
+            else if (roles[0] == "Admin")
+                result.Role = Enums.Role.Admin;
+            else
+                return BadRequest(new ErrorMessage($"Role {roles[0]} doesn't exist!"));
             
-            return Ok(_mapper.Map<AccountReadDto>(user));
+            return Ok(result);
         }
 
         /// <summary>
@@ -326,7 +337,14 @@ namespace DowiezPlBackend.Controllers
             var me = await _userManager.FindByNameAsync(HttpContext.User.Identity.Name);
             var user = await _userManager.FindByIdAsync(userId);
             if (user == null)
-                return NotFound(new ErrorMessage($"User with id {userId} not found."));
+                return NotFound(new ErrorMessage($"User with id {userId} not found.", "AC_BU_1"));
+            
+            if (await IsModerator(user) && !await IsAdmin(me))
+                return Forbid();
+            
+            if (await IsAdmin(user))
+                return BadRequest(new ErrorMessage("Cannot ban admin account.", "AC_BU_2"));
+
             if (status && !user.Banned)
             {
                 await _mailService.SendBannedAsync(user.Email, me.Email, me.FirstName + " " + me.LastName, me.Id.ToString());
