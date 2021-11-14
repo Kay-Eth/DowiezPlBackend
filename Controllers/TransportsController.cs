@@ -539,7 +539,7 @@ namespace DowiezPlBackend.Controllers
             if (transportFromRepo.Creator.Id != me.Id)
                 return Forbid();
             
-            if (transportFromRepo.Status != TransportStatus.Declared)
+            if (transportFromRepo.Status != TransportStatus.InProgress)
                 return BadRequest(new ErrorMessage("Only transport with status InProgress can be finished.", "TC_FT_2"));
             
             transportFromRepo.Status = TransportStatus.Finished;
