@@ -110,12 +110,16 @@ namespace DowiezPlBackend.Controllers
         [HttpGet("banned")]
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = "Moderator,Admin")]
         [ProducesResponseType(StatusCodes.Status200OK)]
-        public async Task<ActionResult<IEnumerable<AccountLimitedReadDto>>> GetBlockedAccounts()
+        public async Task<ActionResult<IEnumerable<AccountLimitedReadDto>>> GetBannedAccounts()
         {
             var result = await _userManager.Users.Where(u => u.Banned).ToListAsync();
             return Ok(_mapper.Map<IEnumerable<AccountLimitedReadDto>>(result));
         }
 
+        /// <summary>
+        /// Returns all moderators.
+        /// </summary>
+        /// <response code="200">Returns object with user data</response>
         [HttpGet("moderators")]
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = "Admin")]
         [ProducesResponseType(StatusCodes.Status200OK)]

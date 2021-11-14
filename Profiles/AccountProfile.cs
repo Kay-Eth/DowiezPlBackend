@@ -23,6 +23,10 @@ namespace DowiezPlBackend.Profiles
             CreateMap<AppUser, AccountLimitedReadDto>()
                 .ForMember(dest => dest.AccountId,
                     opts => opts.MapFrom(src => src.Id));
+
+            CreateMap<AppUser, AccountModeratorsDto>()
+                .ForMember(dest => dest.AccountId,
+                    opts => opts.MapFrom(src => src.Id));
         }
     }
 }
