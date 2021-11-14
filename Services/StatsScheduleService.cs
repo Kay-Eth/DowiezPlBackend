@@ -24,8 +24,8 @@ namespace DowiezPlBackend.Services
 
         public StatsScheduleService(IServiceScopeFactory scopeFactory)
         {
-            _expression = CronExpression.Parse("* * * * *");
-            // _expression = CronExpression.Parse("0 3 * * *");
+            // _expression = CronExpression.Parse("* * * * *");
+            _expression = CronExpression.Parse("0 3 * * *");
             _timeZoneInfo = TimeZoneInfo.Utc;
             
             _scopeFactory = scopeFactory; 
@@ -93,15 +93,13 @@ namespace DowiezPlBackend.Services
                     .ToDictionaryAsync(v => v.Key, v => v.Count));
                 
                 var datetime_itr = (new List<DateTime>() { resultUsers.Keys.Min(), resultDemands.Keys.Min(), resultTransports.Keys.Min() }).Min();
-                var datetime_max = (new List<DateTime>() { resultUsers.Keys.Max(), resultDemands.Keys.Max(), resultTransports.Keys.Max() }).Max();
+                var datetime_max = DateTime.UtcNow.Date;
 
                 var list_dates = new List<DateTime>();
                 var list_users = new List<int>();
                 var list_demands = new List<int>();
                 var list_transports = new List<int>();
-
-                Console.WriteLine("MAX: " + datetime_max.ToString());
-
+                
                 while (datetime_itr.Date <= datetime_max.Date)
                 {
                     Console.WriteLine(datetime_itr.ToString());
