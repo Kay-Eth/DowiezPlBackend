@@ -112,7 +112,10 @@ namespace DowiezPlBackend.Controllers
         [ProducesResponseType(StatusCodes.Status200OK)]
         public async Task<ActionResult<IEnumerable<AccountLimitedReadDto>>> GetBannedAccounts()
         {
-            var result = await _userManager.Users.Where(u => u.Banned).ToListAsync();
+            var role = await _context.Roles.AsQueryable().FirstOrDefaultAsync(r => r.Name == "Standard");
+            var userIds = _context.UserRoles.AsQueryable().Where(r => r.RoleId == role.Id).Select(r => r.UserId);
+            var result = await _context.Users.AsQueryable().Where(u => userIds.Contains(u.Id) && u.Banned).ToListAsync();
+            
             return Ok(_mapper.Map<IEnumerable<AccountLimitedReadDto>>(result));
         }
 
