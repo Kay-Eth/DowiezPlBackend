@@ -198,6 +198,8 @@ namespace DowiezPlBackend
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
+            app.UseCors("AllowDevClient");
+            
             app.UseAuthentication();
             if (env.IsDevelopment() || env.IsEnvironment("Server") || env.IsEnvironment("VPS"))
             {
@@ -215,8 +217,6 @@ namespace DowiezPlBackend
             app.UseHttpsRedirection();
 
             app.UseRouting();
-
-            app.UseCors("AllowDevClient");
 
             app.UseAuthorization();
             app.UseEndpoints(endpoints =>
