@@ -113,6 +113,9 @@ namespace DowiezPlBackend.Controllers
             if (await IsModerator(rated))
                 return BadRequest(new ErrorMessage("Failed to create an opinion.", "OC_CO_2"));
             
+            if (_repository.GetOpinionPairAsync(issuer.Id, rated.Id) != null)
+                return BadRequest(new ErrorMessage("Opinion for that user already exists.", "OC_CO_3"));
+            
             var opinion = _mapper.Map<Opinion>(opinionCreateDto);
             opinion.CreationDate = System.DateTime.UtcNow;
             opinion.Issuer = issuer;
@@ -120,7 +123,7 @@ namespace DowiezPlBackend.Controllers
 
             _repository.CreateOpinion(opinion);
             if (!await _repository.SaveChangesAsync())
-                return BadRequest(new ErrorMessage("Failed to create an opinion.", "OC_CO_3"));
+                return BadRequest(new ErrorMessage("Failed to create an opinion.", "OC_CO_4"));
 
             var opinionReadDto = _mapper.Map<OpinionReadDto>(opinion);
             return CreatedAtRoute(nameof(GetOpinion), new { opinionId = opinionReadDto.OpinionId }, opinionReadDto);
