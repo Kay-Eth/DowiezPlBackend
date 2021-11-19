@@ -1,5 +1,6 @@
 using System;
 using System.ComponentModel.DataAnnotations;
+using DowiezPlBackend.Dtos.Account;
 
 namespace DowiezPlBackend.Dtos.Group
 {
@@ -12,6 +13,8 @@ namespace DowiezPlBackend.Dtos.Group
         [Required]
         public string Name { get; set; }
         public string Description { get; set; }
+        [Required]
+        public AccountLimitedReadDto Creator { get; set; }
         // TODO: Conversation dto (or maybe not)
     }
 }

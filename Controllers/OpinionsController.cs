@@ -113,7 +113,7 @@ namespace DowiezPlBackend.Controllers
             if (await IsModerator(rated))
                 return BadRequest(new ErrorMessage("Failed to create an opinion.", "OC_CO_2"));
             
-            if (_repository.GetOpinionPairAsync(issuer.Id, rated.Id) != null)
+            if (await _repository.GetOpinionPairAsync(issuer.Id, rated.Id) != null)
                 return BadRequest(new ErrorMessage("Opinion for that user already exists.", "OC_CO_3"));
             
             var opinion = _mapper.Map<Opinion>(opinionCreateDto);
