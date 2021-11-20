@@ -87,12 +87,12 @@ namespace DowiezPlBackend.Controllers
             }
 
             var dto = _mapper.Map<ReportReadDto>(reportFromRepo);
-            dto.ReporterDto = _mapper.Map<AccountLimitedReadDto>(reportFromRepo.Reporter);
+            dto.Reporter = _mapper.Map<AccountLimitedReadDto>(reportFromRepo.Reporter);
             
             if (reportFromRepo.Reported != null)
-                dto.ReportedDto = _mapper.Map<AccountLimitedReadDto>(reportFromRepo.Reported);
+                dto.Reported = _mapper.Map<AccountLimitedReadDto>(reportFromRepo.Reported);
             if (reportFromRepo.Operator != null)
-                dto.OperatorDto = _mapper.Map<AccountLimitedReadDto>(reportFromRepo.Operator);
+                dto.Operator = _mapper.Map<AccountLimitedReadDto>(reportFromRepo.Operator);
 
             if (reportFromRepo.Category == ReportCategory.Transport)
                 dto.TransportId = reportFromRepo.ReportedTransport.TransportId;

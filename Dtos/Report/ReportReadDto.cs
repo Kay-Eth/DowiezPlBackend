@@ -21,8 +21,8 @@ namespace DowiezPlBackend.Dtos.Report
         [Required]
         public ReportStatus Status { get; set; }
         [Required]
-        public AccountLimitedReadDto ReporterDto { get; set; }
-        public AccountLimitedReadDto ReportedDto { get; set; }
+        public AccountLimitedReadDto Reporter { get; set; }
+        public AccountLimitedReadDto Reported { get; set; }
         // public TransportReadDto ReportedTransport { get; set; }
         // public DemandReadDto ReportedDemand { get; set; }
         public GroupReadDto ReportedGroup { get; set; }
@@ -32,6 +32,6 @@ namespace DowiezPlBackend.Dtos.Report
         // public Guid? GroupId { get; set; }
         public Guid? OpinionId { get; set; }
 
-        public AccountLimitedReadDto OperatorDto { get; set; }
+        public AccountLimitedReadDto Operator { get; set; }
     }
 }
