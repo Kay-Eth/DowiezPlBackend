@@ -60,6 +60,9 @@ namespace DowiezPlBackend.Data
                 .Include(r => r.Reporter)
                 .Include(r => r.Reported)
                 .Include(r => r.Operator)
+                .Include(r => r.ReportedDemand)
+                .Include(r => r.ReportedGroup)
+                .Include(r => r.ReportedTransport)
                 .FirstOrDefaultAsync(r => r.ReportId == reportId);
         }
 
