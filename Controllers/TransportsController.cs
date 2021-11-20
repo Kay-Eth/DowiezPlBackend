@@ -321,7 +321,6 @@ namespace DowiezPlBackend.Controllers
         /// <response code="403">Only creator of a transport can do this</response>
         /// <response code="404">Transport not found</response>
         [HttpGet("{transportId}/demands")]
-        [Authorize(Roles = "Standard")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         public async Task<ActionResult<DemandSimpleReadDto>> GetTransportDemands(Guid transportId)
         {
@@ -331,7 +330,7 @@ namespace DowiezPlBackend.Controllers
             if (transportFromRepo == null)
                 return NotFound();
             
-            if (transportFromRepo.Creator.Id != me.Id)
+            if (transportFromRepo.Creator.Id != me.Id || await IsModerator(me))
                 return Forbid();
             
             var result = transportFromRepo.Demands;
