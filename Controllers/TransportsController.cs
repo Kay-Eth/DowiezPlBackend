@@ -330,7 +330,7 @@ namespace DowiezPlBackend.Controllers
             if (transportFromRepo == null)
                 return NotFound();
             
-            if (transportFromRepo.Creator.Id != me.Id || !await IsModerator(me))
+            if (transportFromRepo.Creator.Id != me.Id && !await IsModerator(me))
                 return Forbid();
             
             var result = transportFromRepo.Demands;
