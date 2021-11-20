@@ -268,13 +268,13 @@ namespace DowiezPlBackend.Controllers
             if (reportFromRepo == null)
                 return NotFound();
             
-            if (reportFromRepo.Operator != null)
-                return BadRequest(new ErrorMessage("Cannot assign a report that is already assigned to someone.", "RC_AR_1"));
+            // if (reportFromRepo.Operator != null)
+            //     return BadRequest(new ErrorMessage("Cannot assign a report that is already assigned to someone.", "RC_AR_1"));
             
             reportFromRepo.Operator = await GetMyUserAsync();
             reportFromRepo.Status = ReportStatus.InProgress;
             if (!await _repository.SaveChangesAsync())
-                return BadRequest(new ErrorMessage("Failed to update a report.", "RC_AR_2"));
+                return BadRequest(new ErrorMessage("Failed to update a report.", "RC_AR_1"));
             
             return NoContent();
         }
