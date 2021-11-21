@@ -197,7 +197,7 @@ namespace DowiezPlBackend.Controllers
             var me = await GetMyUserAsync();
 
             if (await _repository.IsUserAMemberOfAGroup(me.Id, groupFromRepo.GroupId))
-                return BadRequest(new ErrorMessage("You are already member of this group.", "GC_JG_1"));
+                return BadRequest(new ErrorMessage("You are already a member of this group.", "GC_JG_1"));
 
             if (groupFromRepo.GroupPassword != password)
             {
@@ -208,6 +208,8 @@ namespace DowiezPlBackend.Controllers
                 User = me,
                 Group = groupFromRepo
             });
+
+            await _repository.AddUserToConversation(me, groupFromRepo.GroupConversation);
 
             if (!await _repository.SaveChangesAsync())
                 return BadRequest(new ErrorMessage("Failed to join a group.", "GC_JG_3"));
@@ -241,6 +243,8 @@ namespace DowiezPlBackend.Controllers
                 return BadRequest(new ErrorMessage("You cannot leave a group you created.", "GC_LG_2"));
 
             _repository.DeleteMember(member);
+
+            await _repository.RemoveUserFromConversation(me, groupFromRepo.GroupConversation);
 
             if (!await _repository.SaveChangesAsync())
                 return BadRequest(new ErrorMessage("Failed to leave a group.", "GC_LG_3"));
