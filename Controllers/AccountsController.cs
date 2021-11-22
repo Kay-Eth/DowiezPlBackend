@@ -407,7 +407,7 @@ namespace DowiezPlBackend.Controllers
             var user = await _userManager.FindByEmailAsync(email);
             if (user != null)
             {
-                var password_reset_token = await _userManager.GeneratePasswordResetTokenAsync(user);
+                var password_reset_token = EncodeTo64(await _userManager.GeneratePasswordResetTokenAsync(user));
 
                 if (await IsModerator(user))
                     await _mailService.SendModeratorPasswordResetAsync(email, user.Id.ToString(), password_reset_token);
@@ -433,7 +433,7 @@ namespace DowiezPlBackend.Controllers
             if (user == null)
                 return BadRequest(new ErrorMessage("Password reset failed.", "AC_RP_1"));
             
-            var result = await _userManager.ResetPasswordAsync(user, arpDto.Token, arpDto.Password);
+            var result = await _userManager.ResetPasswordAsync(user, arpDto.Token, DecodeFrom64(arpDto.Password));
             if (result.Succeeded)
             {
                 return NoContent();
@@ -537,6 +537,20 @@ namespace DowiezPlBackend.Controllers
                 Token = new JwtSecurityTokenHandler().WriteToken(token),
                 Expiration = expiration
             };
+        }
+
+        static public string EncodeTo64(string toEncode)
+        {
+            byte[] toEncodeAsBytes = System.Text.ASCIIEncoding.ASCII.GetBytes(toEncode);
+            string returnValue = System.Convert.ToBase64String(toEncodeAsBytes);
+            return returnValue;
+        }
+
+        static public string DecodeFrom64(string encodedData)
+        {
+            byte[] encodedDataAsBytes = System.Convert.FromBase64String(encodedData);
+            string returnValue = System.Text.ASCIIEncoding.ASCII.GetString(encodedDataAsBytes);
+            return returnValue;
         }
     }
 }
