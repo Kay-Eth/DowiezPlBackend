@@ -246,7 +246,7 @@ namespace DowiezPlBackend.Controllers
             if (result.Succeeded)
             {
                 await _userManager.AddToRoleAsync(user, "Standard");
-                var email_confirmation_token = await _userManager.GenerateEmailConfirmationTokenAsync(user);
+                var email_confirmation_token = EncodeTo64(await _userManager.GenerateEmailConfirmationTokenAsync(user));
 
                 await _mailService.SendEmailConfirmationAsync(accountCreateDto.Email, user.Id.ToString(), email_confirmation_token);
 
@@ -387,7 +387,7 @@ namespace DowiezPlBackend.Controllers
         public async Task<ActionResult> ConfirmEmail(AccountEmailConfirmationDto aecDto)
         {
             var user = await _userManager.FindByIdAsync(aecDto.UserId);
-            var result = await _userManager.ConfirmEmailAsync(user, aecDto.Token);
+            var result = await _userManager.ConfirmEmailAsync(user, DecodeFrom64(aecDto.Token));
 
             if (result.Succeeded)
                 return NoContent();
