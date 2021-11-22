@@ -408,9 +408,6 @@ namespace DowiezPlBackend.Controllers
             if (user != null)
             {
                 var password_reset_token = await _userManager.GeneratePasswordResetTokenAsync(user);
-                Console.WriteLine(password_reset_token);
-                Console.WriteLine(EncodeTo64(password_reset_token));
-                Console.WriteLine(DecodeFrom64(EncodeTo64(password_reset_token)));
 
                 if (await IsModerator(user))
                     await _mailService.SendModeratorPasswordResetAsync(email, user.Id.ToString(), password_reset_token);
@@ -436,7 +433,7 @@ namespace DowiezPlBackend.Controllers
             if (user == null)
                 return BadRequest(new ErrorMessage("Password reset failed.", "AC_RP_1"));
             
-            var result = await _userManager.ResetPasswordAsync(user, arpDto.Token, DecodeFrom64(arpDto.Password));
+            var result = await _userManager.ResetPasswordAsync(user, DecodeFrom64(arpDto.Token), arpDto.Password);
             if (result.Succeeded)
             {
                 return NoContent();
