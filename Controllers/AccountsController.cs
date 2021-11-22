@@ -407,7 +407,7 @@ namespace DowiezPlBackend.Controllers
             var user = await _userManager.FindByEmailAsync(email);
             if (user != null)
             {
-                var password_reset_token = await _userManager.GeneratePasswordResetTokenAsync(user);
+                var password_reset_token = EncodeTo64(await _userManager.GeneratePasswordResetTokenAsync(user));
 
                 if (await IsModerator(user))
                     await _mailService.SendModeratorPasswordResetAsync(email, user.Id.ToString(), password_reset_token);
