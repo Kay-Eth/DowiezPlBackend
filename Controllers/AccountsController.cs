@@ -409,6 +409,7 @@ namespace DowiezPlBackend.Controllers
             {
                 var password_reset_token = await _userManager.GeneratePasswordResetTokenAsync(user);
                 Console.WriteLine(password_reset_token);
+                Console.WriteLine(EncodeTo64(password_reset_token));
                 Console.WriteLine(DecodeFrom64(EncodeTo64(password_reset_token)));
 
                 if (await IsModerator(user))
