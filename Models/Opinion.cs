@@ -13,7 +13,7 @@ namespace DowiezPlBackend.Models
         public DateTime CreationDate { get; set; }
 
         [Required]
-        [Range(1, 10)]
+        [Range(1, 5)]
         public int Rating { get; set; }
 
         [MaxLength(5000)]
