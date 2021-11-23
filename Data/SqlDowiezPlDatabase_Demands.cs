@@ -54,7 +54,7 @@ namespace DowiezPlBackend.Data
                     && categories.Contains(d.Category)
                     && (fromCityId == null ? true : (d.From == null ? true : fromCities.Contains(d.From.CityId)))
                     && (destinationCityId == null ? true : (destinationCities.Contains(d.Destination.CityId)))
-                    && (limitedToGroupId == null ? true : d.LimitedTo.GroupId == limitedToGroupId)
+                    && (limitedToGroupId == null ? d.LimitedTo == null : d.LimitedTo.GroupId == limitedToGroupId)
                     && d.Creator.Id != excludeUser.Id
                     && d.Reciever.Id != excludeUser.Id
                 ).ToListAsync();
