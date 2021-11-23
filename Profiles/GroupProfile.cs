@@ -8,7 +8,10 @@ namespace DowiezPlBackend.Profiles
     {
         public GroupProfile()
         {
-            CreateMap<Group, GroupReadDto>();
+            CreateMap<Group, GroupReadDto>()
+                .ForMember(dest => dest.IsPrivate,
+                    opts => opts.MapFrom(src => src.GroupPassword != null)
+                );
             CreateMap<GroupCreateDto, Group>();
             CreateMap<GroupUpdateDto, Group>();
         }

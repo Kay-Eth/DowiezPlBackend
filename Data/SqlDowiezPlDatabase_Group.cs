@@ -45,7 +45,6 @@ namespace DowiezPlBackend.Data
                 .Include(g => g.Members)
                 .Include(g => g.GroupConversation)
                 .Include(g => g.Creator)
-                .Where(g => g.GroupPassword == null)
                 .ToListAsync();
         }
 

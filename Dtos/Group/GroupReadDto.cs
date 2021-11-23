@@ -15,6 +15,8 @@ namespace DowiezPlBackend.Dtos.Group
         public string Description { get; set; }
         [Required]
         public AccountLimitedReadDto Creator { get; set; }
+        [Required]
+        public bool IsPrivate { get; set; }
         // TODO: Conversation dto (or maybe not)
     }
 }
