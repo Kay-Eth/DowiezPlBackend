@@ -39,15 +39,5 @@ namespace DowiezPlBackend.Data
             
             _context.Cities.Remove(city);
         }
-
-        public async Task<List<City>> GetCityDistrictsAsync(City city)
-        {
-            if (city.CityDistrict != null)
-                return new List<City>() { city };
-            
-            return await _context.Cities.AsNoTracking()
-                .Where(c => c.CityName == city.CityName)
-                .ToListAsync();
-        }
     }
 }

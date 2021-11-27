@@ -29,10 +29,6 @@ namespace DowiezPlBackend.Data
         {
             base.OnModelCreating(builder);
 
-            builder.Entity<City>()
-                .HasIndex(c => new { c.CityName, c.CityDistrict })
-                .IsUnique();
-
             builder.Entity<Opinion>()
                 .HasIndex(new string[] {"IssuerId", "RatedId"})
                 .IsUnique();
