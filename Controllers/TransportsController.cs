@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.Linq;
 using System.Threading.Tasks;
 using AutoMapper;
 using DowiezPlBackend.Data;
@@ -425,6 +426,58 @@ namespace DowiezPlBackend.Controllers
             demandFromRepo.Status = DemandStatus.Created;
             if (!await _repository.SaveChangesAsync())
                 return BadRequest(new ErrorMessage("Failed to deny a demand.", "TC_DToD_6"));
+
+            return NoContent();
+        }
+
+        /// <summary>
+        /// Denies request to carry a demand within a transport
+        /// </summary>
+        /// <param name="transportId">Transport's id</param>
+        /// <param name="demandId">Demand's id</param>
+        /// <response code="204">Demand carry denied</response>
+        /// <response code="400">Failed to deny transport of demand</response>
+        /// <response code="403">Only creator of a transport can do this</response>
+        /// <response code="404">Demand or transport not found</response>
+        [HttpPost("{transportId}/remove/{demandId}")]
+        [Authorize(Roles = "Standard")]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(typeof(ErrorMessage), StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(typeof(ErrorMessage), StatusCodes.Status404NotFound)]
+        public async Task<ActionResult> RemoveTransportOfDemand(Guid transportId, Guid demandId)
+        {
+            var me = await GetMyUserAsync();
+            var transportFromRepo = await _repository.GetTransportNotTrackedAsync(transportId);
+
+            if (transportFromRepo == null)
+                return NotFound(new ErrorMessage("Transport not found.", "TC_RToD_1"));
+            
+            if (transportFromRepo.Creator.Id != me.Id)
+                return Forbid();
+            
+            if (transportFromRepo.Status != TransportStatus.Declared)
+                return BadRequest(new ErrorMessage("Only transport with status Declared can remove demands.", "TC_RToD_2"));
+            
+            var demandFromRepo = await _repository.GetDemandAsync(demandId);
+            if (demandFromRepo == null)
+                return NotFound(new ErrorMessage("Demand not found.", "TC_RToD_3"));
+            
+            if (demandFromRepo.Transport.TransportId != transportFromRepo.TransportId)
+                return BadRequest(new ErrorMessage("Only demand connected to this transport can be removed.", "TC_RToD_4"));
+
+            if (demandFromRepo.Status != DemandStatus.Accepted)
+                return BadRequest(new ErrorMessage("Only demand with status Accepted can be removed.", "TC_RToD_5"));
+
+            demandFromRepo.Status = DemandStatus.Created;
+            if ((await _repository.GetUserDemandsAsync(me.Id))
+                .Count(d => d.Transport.TransportId == demandFromRepo.Transport.TransportId) == 1)
+            {
+                await _repository.RemoveUserFromConversation(me, demandFromRepo.Transport.TransportConversation);
+            }
+            
+            demandFromRepo.Transport = null;
+            if (!await _repository.SaveChangesAsync())
+                return BadRequest(new ErrorMessage("Failed to remove a demand.", "TC_DToD_6"));
 
             return NoContent();
         }
