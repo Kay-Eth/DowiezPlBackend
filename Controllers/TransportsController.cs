@@ -426,6 +426,7 @@ namespace DowiezPlBackend.Controllers
             demandFromRepo.Status = DemandStatus.Created;
             if (!await _repository.SaveChangesAsync())
                 return BadRequest(new ErrorMessage("Failed to deny a demand.", "TC_DToD_6"));
+            demandFromRepo.Transport = null;
 
             return NoContent();
         }
