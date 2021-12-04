@@ -473,7 +473,7 @@ namespace DowiezPlBackend.Controllers
             if ((await _repository.GetUserDemandsAsync(me.Id))
                 .Count(d => d.Transport.TransportId == demandFromRepo.Transport.TransportId) == 1)
             {
-                await _repository.RemoveUserFromConversation(me, demandFromRepo.Transport.TransportConversation);
+                await _repository.RemoveUserFromConversation(demandFromRepo.Creator, demandFromRepo.Transport.TransportConversation);
             }
             
             demandFromRepo.Transport = null;
