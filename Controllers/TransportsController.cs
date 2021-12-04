@@ -431,7 +431,7 @@ namespace DowiezPlBackend.Controllers
         }
 
         /// <summary>
-        /// Denies request to carry a demand within a transport
+        /// Removes demand from a transport
         /// </summary>
         /// <param name="transportId">Transport's id</param>
         /// <param name="demandId">Demand's id</param>
