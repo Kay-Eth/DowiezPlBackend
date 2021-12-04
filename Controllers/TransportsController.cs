@@ -435,8 +435,8 @@ namespace DowiezPlBackend.Controllers
         /// </summary>
         /// <param name="transportId">Transport's id</param>
         /// <param name="demandId">Demand's id</param>
-        /// <response code="204">Demand carry denied</response>
-        /// <response code="400">Failed to deny transport of demand</response>
+        /// <response code="204">Demand transport removed</response>
+        /// <response code="400">Failed to remove transport of demand</response>
         /// <response code="403">Only creator of a transport can do this</response>
         /// <response code="404">Demand or transport not found</response>
         [HttpPost("{transportId}/remove/{demandId}")]
