@@ -424,9 +424,9 @@ namespace DowiezPlBackend.Controllers
                 return BadRequest(new ErrorMessage("Only demand with status TransportRequested can be denied.", "TC_DToD_5"));
 
             demandFromRepo.Status = DemandStatus.Created;
+            demandFromRepo.Transport = null;
             if (!await _repository.SaveChangesAsync())
                 return BadRequest(new ErrorMessage("Failed to deny a demand.", "TC_DToD_6"));
-            demandFromRepo.Transport = null;
 
             return NoContent();
         }
