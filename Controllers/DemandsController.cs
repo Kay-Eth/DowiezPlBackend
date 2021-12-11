@@ -8,23 +8,23 @@ using DowiezPlBackend.Data;
 using DowiezPlBackend.Dtos;
 using DowiezPlBackend.Dtos.Demand;
 using DowiezPlBackend.Enums;
+using DowiezPlBackend.Hubs;
 using DowiezPlBackend.Models;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.SignalR;
 
 namespace DowiezPlBackend.Controllers
 {
-    public class DemandsController : DowiezPlControllerBase
+    public class DemandsController : DowiezPlControllerBaseWithChat
     {
-        IDowiezPlRepository _repository;
         IMapper _mapper;
         
-        public DemandsController(IDowiezPlRepository repository, IMapper mapper, UserManager<AppUser> userManager) : base(userManager)
+        public DemandsController(UserManager<AppUser> userManager, IHubContext<ChatHub> chatHub, IDowiezPlRepository repository, IMapper mapper) : base(userManager, chatHub, repository)
         {
-            _repository = repository;
             _mapper = mapper;
         }
 
@@ -369,10 +369,12 @@ namespace DowiezPlBackend.Controllers
                 return BadRequest(new ErrorMessage("Demand is already canceled.", "DC_CaD_2"));
             }
 
+            Guid? conversationId = null;
             demandFromRepo.Status = DemandStatus.Canceled;
             if ((await _repository.GetUserDemandsAsync(demandFromRepo.Creator.Id))
                 .Count(d => d.Transport.TransportId == demandFromRepo.Transport.TransportId) == 1)
             {
+                conversationId = demandFromRepo.Transport.TransportConversation.ConversationId;
                 await _repository.RemoveUserFromConversation(demandFromRepo.Creator, demandFromRepo.Transport.TransportConversation);
             }
             demandFromRepo.Transport = null;
@@ -380,6 +382,8 @@ namespace DowiezPlBackend.Controllers
             if (!await _repository.SaveChangesAsync())
                 return BadRequest(new ErrorMessage("Failed to cancel a demand.", "DC_CaD_3"));
             
+            if (conversationId != null)
+                await NotifyUserLeaveConversation(demandFromRepo.Creator.Id, (Guid)conversationId);
             return NoContent();
         }
 
@@ -459,6 +463,7 @@ namespace DowiezPlBackend.Controllers
             if (!await _repository.SaveChangesAsync())
                 return BadRequest(new ErrorMessage("Failed to accept proposition for a transport.", "DC_AP_3"));
             
+            await NotifyUserJoinConversation(demandFromRepo.Creator.Id, demandFromRepo.Transport.TransportConversation.ConversationId);
             return NoContent();
         }
 
@@ -526,11 +531,12 @@ namespace DowiezPlBackend.Controllers
             {
                 await _repository.RemoveUserFromConversation(me, demandFromRepo.Transport.TransportConversation);
             }
-
+            Guid convId = demandFromRepo.Transport.TransportConversation.ConversationId;
             demandFromRepo.Transport = null;
             if (!await _repository.SaveChangesAsync())
                 return BadRequest(new ErrorMessage("Failed to deny proposition for a transport.", "DC_CToD_3"));
             
+            await NotifyUserLeaveConversation(me.Id, convId);
             return NoContent();
         }
     }

@@ -7,22 +7,22 @@ using DowiezPlBackend.Data;
 using DowiezPlBackend.Dtos;
 using DowiezPlBackend.Dtos.Group;
 using DowiezPlBackend.Enums;
+using DowiezPlBackend.Hubs;
 using DowiezPlBackend.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.SignalR;
 
 namespace DowiezPlBackend.Controllers
 {
-    public class GroupsController : DowiezPlControllerBase
+    public class GroupsController : DowiezPlControllerBaseWithChat
     {
-        IDowiezPlRepository _repository;
         IMapper _mapper;
 
-        public GroupsController(IDowiezPlRepository repository, IMapper mapper, UserManager<AppUser> userManager) : base(userManager)
+        public GroupsController(UserManager<AppUser> userManager, IHubContext<ChatHub> chatHub, IDowiezPlRepository repository, IMapper mapper) : base(userManager, chatHub, repository)
         {
-            _repository = repository;
             _mapper = mapper;
         }
 
@@ -104,6 +104,7 @@ namespace DowiezPlBackend.Controllers
             if (!await _repository.SaveChangesAsync())
                 return BadRequest(new ErrorMessage("Failed to create a group.", "GC_CG_1"));
 
+            await NotifyUserJoinConversation(me.Id, conversation.ConversationId);
             var groupReadDto = _mapper.Map<GroupReadDto>(group);
             return CreatedAtRoute(nameof(GetGroup), new { groupId = groupReadDto.GroupId }, groupReadDto);
         }
@@ -167,6 +168,8 @@ namespace DowiezPlBackend.Controllers
             {
                 return Forbid();
             }
+            
+            var convId  =groupFromRepo.GroupConversation.ConversationId;
 
             _repository.DeleteGroup(groupFromRepo);
             _repository.DeleteConversation(groupFromRepo.GroupConversation);
@@ -174,6 +177,7 @@ namespace DowiezPlBackend.Controllers
             if (!await _repository.SaveChangesAsync())
                 return BadRequest(new ErrorMessage("Failed to delete a group.", "GC_DG_1"));
 
+            await NotifyConvRemoved(convId);
             return NoContent();
         }
 
@@ -214,6 +218,8 @@ namespace DowiezPlBackend.Controllers
             if (!await _repository.SaveChangesAsync())
                 return BadRequest(new ErrorMessage("Failed to join a group.", "GC_JG_3"));
             
+            await NotifyUserJoinConversation(me.Id, groupFromRepo.GroupConversation.ConversationId);
+
             return NoContent();
         }
 
@@ -249,6 +255,8 @@ namespace DowiezPlBackend.Controllers
             if (!await _repository.SaveChangesAsync())
                 return BadRequest(new ErrorMessage("Failed to leave a group.", "GC_LG_3"));
             
+            await NotifyUserLeaveConversation(me.Id, groupFromRepo.GroupConversation.ConversationId);
+
             return NoContent();
         }
     }

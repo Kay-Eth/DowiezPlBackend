@@ -21,7 +21,6 @@ namespace DowiezPlBackend.Controllers
         
         public ConversationsController(UserManager<AppUser> userManager, IHubContext<ChatHub> chatHub, IDowiezPlRepository repository, IMapper mapper) : base(userManager, chatHub, repository)
         {
-            _repository = repository;
             _mapper = mapper;
         }
 

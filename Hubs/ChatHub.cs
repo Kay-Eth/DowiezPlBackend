@@ -73,6 +73,11 @@ namespace DowiezPlBackend.Hubs
             }
         }
 
+        public static async Task NotifyConvRemoved(IHubContext<ChatHub> hub, string conversationId)
+        {
+            await hub.Clients.Group(conversationId).SendAsync("ChatRemoved", conversationId);
+        }
+
         public override async Task OnConnectedAsync()
         {
             var user = await GetMyUserAsync();

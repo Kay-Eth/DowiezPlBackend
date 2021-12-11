@@ -9,22 +9,22 @@ using DowiezPlBackend.Dtos;
 using DowiezPlBackend.Dtos.Demand;
 using DowiezPlBackend.Dtos.Transport;
 using DowiezPlBackend.Enums;
+using DowiezPlBackend.Hubs;
 using DowiezPlBackend.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.SignalR;
 
 namespace DowiezPlBackend.Controllers
 {
-    public class TransportsController : DowiezPlControllerBase
+    public class TransportsController : DowiezPlControllerBaseWithChat
     {
-        IDowiezPlRepository _repository;
         IMapper _mapper;
         
-        public TransportsController(IDowiezPlRepository repository, IMapper mapper, UserManager<AppUser> userManager) : base(userManager)
+        public TransportsController(UserManager<AppUser> userManager, IHubContext<ChatHub> chatHub, IDowiezPlRepository repository, IMapper mapper) : base(userManager, chatHub, repository)
         {
-            _repository = repository;
             _mapper = mapper;
         }
 
@@ -176,6 +176,8 @@ namespace DowiezPlBackend.Controllers
 
             if (!await _repository.SaveChangesAsync())
                 return BadRequest(new ErrorMessage("Failed to create a transport.", "TC_CT_3"));
+            
+            await NotifyUserJoinConversation(me.Id, transport.TransportConversation.ConversationId);
 
             var transportReadDto = _mapper.Map<TransportReadDto>(transport);
             return CreatedAtRoute(nameof(GetTransport), new { transportId = transportReadDto.TransportId }, transportReadDto);
@@ -257,6 +259,7 @@ namespace DowiezPlBackend.Controllers
                 return BadRequest(new ErrorMessage("Cannot cancel a transport with status other than Declared.", "TC_CaT_2"));
             
             transportFromRepo.Status = TransportStatus.Canceled;
+            var convId = transportFromRepo.TransportConversation.ConversationId;
             _repository.DeleteConversation(transportFromRepo.TransportConversation);
             transportFromRepo.TransportConversation = null;
 
@@ -270,6 +273,8 @@ namespace DowiezPlBackend.Controllers
             if (!await _repository.SaveChangesAsync())
                 return BadRequest(new ErrorMessage("Failed to cancel a transport.", "TC_CaT_3"));
             
+            await NotifyConvRemoved(convId);
+
             return NoContent();
         }
 
@@ -298,6 +303,7 @@ namespace DowiezPlBackend.Controllers
                 return BadRequest(new ErrorMessage("Cannot cancel a transport with status other than Declared.", "TC_CaT_2"));
             
             transportFromRepo.Status = TransportStatus.Canceled;
+            var convId = transportFromRepo.TransportConversation.ConversationId;
             _repository.DeleteConversation(transportFromRepo.TransportConversation);
             transportFromRepo.TransportConversation = null;
 
@@ -311,6 +317,8 @@ namespace DowiezPlBackend.Controllers
             if (!await _repository.SaveChangesAsync())
                 return BadRequest(new ErrorMessage("Failed to cancel a transport.", "TC_CaT_3"));
             
+            await NotifyConvRemoved(convId);
+
             return NoContent();
         }
 
@@ -381,6 +389,8 @@ namespace DowiezPlBackend.Controllers
             demandFromRepo.Status = DemandStatus.Accepted;
             if (!await _repository.SaveChangesAsync())
                 return BadRequest(new ErrorMessage("Failed to accept a demand.", "TC_AToD_6"));
+
+            await NotifyUserJoinConversation(demandFromRepo.Creator.Id, transportFromRepo.TransportConversation.ConversationId);
 
             return NoContent();
         }
@@ -479,6 +489,8 @@ namespace DowiezPlBackend.Controllers
             demandFromRepo.Transport = null;
             if (!await _repository.SaveChangesAsync())
                 return BadRequest(new ErrorMessage("Failed to remove a demand.", "TC_DToD_6"));
+
+            await NotifyUserLeaveConversation(demandFromRepo.Creator.Id, transportFromRepo.TransportConversation.ConversationId);
 
             return NoContent();
         }
@@ -601,12 +613,15 @@ namespace DowiezPlBackend.Controllers
                 demand.Status = DemandStatus.Finished;
             }
 
+            var convId = transportFromRepo.TransportConversation.ConversationId;
             _repository.DeleteConversation(transportFromRepo.TransportConversation);
             transportFromRepo.TransportConversation = null;
 
             if (!await _repository.SaveChangesAsync())
                 return BadRequest(new ErrorMessage("Failed to finish a transport.", "TC_FT_3"));
             
+            await NotifyConvRemoved(convId);
+
             return NoContent();
         }
     }

@@ -30,5 +30,10 @@ namespace DowiezPlBackend.Controllers
             var accountsConnections = await _repository.GetAccountsActiveConnections(accountId);
             await ChatHub.NotifyLeaveConv(_chatHub, conversationId.ToString(), accountId, accountsConnections);
         }
+
+        protected async Task NotifyConvRemoved(Guid conversationId)
+        {
+            await ChatHub.NotifyConvRemoved(_chatHub, conversationId.ToString());
+        }
     }
 }
