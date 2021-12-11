@@ -48,6 +48,7 @@ namespace DowiezPlBackend.Data
                 .Include(p => p.User)
                 .Include(p => p.Conversation)
                 .ThenInclude(c => c.Participants)
+                .ThenInclude(p => p.User)
                 .Where(p => p.User.Id == userId)
                 .Select(p => p.Conversation)
                 .ToListAsync();
