@@ -91,5 +91,7 @@ namespace DowiezPlBackend.Data
         Task<int> CountOfNewOpinions(DateTime before);
         Task<int> CountOfNewTransports(DateTime before);
         Task<int> CountOfNewGroups(DateTime before);
+
+        Task<List<Connection>> GetAccountsActiveConnections(Guid accountId);
     }
 }

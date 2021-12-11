@@ -7,18 +7,19 @@ using DowiezPlBackend.Data;
 using DowiezPlBackend.Dtos;
 using DowiezPlBackend.Dtos.Conversation;
 using DowiezPlBackend.Enums;
+using DowiezPlBackend.Hubs;
 using DowiezPlBackend.Models;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.SignalR;
 
 namespace DowiezPlBackend.Controllers
 {
-    public class ConversationsController : DowiezPlControllerBase
+    public class ConversationsController : DowiezPlControllerBaseWithChat
     {
-        IDowiezPlRepository _repository;
         IMapper _mapper;
         
-        public ConversationsController(IDowiezPlRepository repository, IMapper mapper, UserManager<AppUser> userManager) : base(userManager)
+        public ConversationsController(UserManager<AppUser> userManager, IHubContext<ChatHub> chatHub, IDowiezPlRepository repository, IMapper mapper) : base(userManager, chatHub, repository)
         {
             _repository = repository;
             _mapper = mapper;
@@ -146,6 +147,9 @@ namespace DowiezPlBackend.Controllers
 
             if (!await _repository.SaveChangesAsync())
                 return BadRequest(new ErrorMessage("Failed to delete a city.", "CoC_CCwU_1"));
+
+            await NotifyUserJoinConversation(me.Id, conversation.ConversationId);
+            await NotifyUserJoinConversation(user.Id, conversation.ConversationId);
             
             var conversationDetailedReadDto = _mapper.Map<ConversationDetailedReadDto>(conversation);
             return CreatedAtRoute(nameof(GetConversationDetails), new { conversationId = conversationDetailedReadDto.ConversationId }, conversationDetailedReadDto);

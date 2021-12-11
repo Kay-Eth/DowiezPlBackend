@@ -53,25 +53,24 @@ namespace DowiezPlBackend.Hubs
             return true;
         }
 
-        public async Task NotifyNewConv(string conversationId, Guid accountId)
+        public static async Task NotifyJoinConv(IHubContext<ChatHub> hub, string conversationId, Guid accountId, List<Connection> connections)
         {
-            var me = await GetMyUserAsync();
-            await NotifyChatJoin(conversationId, accountId);
-            foreach (var connection in me.Connections)
+            await hub.Clients.Group(conversationId).SendAsync("ChatJoin", conversationId, accountId.ToString());
+            foreach (var connection in connections)
             {
-                await Clients.Client(connection.ConnectionId).SendAsync("NewConv", conversationId);
-                await Groups.AddToGroupAsync(connection.ConnectionId, conversationId);
+                await hub.Clients.Client(connection.ConnectionId).SendAsync("JoinConv", conversationId);
+                await hub.Groups.AddToGroupAsync(connection.ConnectionId, conversationId);
             }
         }
 
-        public async Task NotifyChatJoin(string conversationId, Guid accountId)
+        public static async Task NotifyLeaveConv(IHubContext<ChatHub> hub, string conversationId, Guid accountId, List<Connection> connections)
         {
-            await Clients.Group(conversationId).SendAsync("GroupJoin", conversationId, accountId.ToString());
-        }
-
-        public async Task NotifyChatLeave(string conversationId, Guid accountId)
-        {
-            await Clients.Group(conversationId).SendAsync("GroupLeave", conversationId, accountId.ToString());
+            await hub.Clients.Group(conversationId).SendAsync("ChatLeave", conversationId, accountId.ToString());
+            foreach (var connection in connections)
+            {
+                await hub.Clients.Client(connection.ConnectionId).SendAsync("LeaveConv", conversationId);
+                await hub.Groups.RemoveFromGroupAsync(connection.ConnectionId, conversationId);
+            }
         }
 
         public override async Task OnConnectedAsync()
