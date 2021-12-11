@@ -47,6 +47,7 @@ namespace DowiezPlBackend.Data
             return await _context.Participants.AsNoTracking()
                 .Include(p => p.User)
                 .Include(p => p.Conversation)
+                .ThenInclude(c => c.Participants)
                 .Where(p => p.User.Id == userId)
                 .Select(p => p.Conversation)
                 .ToListAsync();
