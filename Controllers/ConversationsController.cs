@@ -131,7 +131,10 @@ namespace DowiezPlBackend.Controllers
             
             if ((await _repository.GetUserConversationsAsync(me.Id))
                 .Where(c => c.Category == ConversationCategory.Normal)
-                .Where(c => c.Participants.Count(p => p.User.Id == me.Id || p.User.Id == user.Id) == 2).Count() > 0)
+                .Where(c => c.Participants.Count(
+                    p => p.User.Id == me.Id
+                    || p.User.Id == user.Id) == 2)
+                .Count() > 0)
             {
                 return BadRequest(new ErrorMessage("Users are already in a private conversation."));
             }
