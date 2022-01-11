@@ -77,7 +77,7 @@ namespace DowiezPlBackend
                             });
 
                             var port = 5001;
-                            var pfxFilePath = "/home/kayeth/DowiezPlBackendUpdate/certificate.pfx";
+                            var pfxFilePath = "/home/kayeth/DowiezPlBackendUpdate/full_certificate.pfx";
                             var pfxPassword = "DowiezPl1234@"; 
 
                             options.Listen(IPAddress.Any, port, listenOptions => {
